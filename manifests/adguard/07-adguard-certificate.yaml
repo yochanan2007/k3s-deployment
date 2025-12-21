@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: adguard-k3s-dahan-house
+  namespace: adguard
+spec:
+  secretName: adguard-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+  - adguard.k3s.dahan.house
+---
