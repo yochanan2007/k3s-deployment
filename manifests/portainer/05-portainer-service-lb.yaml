@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portainer-lb
+  namespace: portainer
+  labels:
+    app.kubernetes.io/name: portainer
+    app.kubernetes.io/component: management
+spec:
+  type: LoadBalancer
+  # IP will be auto-assigned from MetalLB pool
+  ports:
+  - name: http
+    port: 9000
+    targetPort: http
+    protocol: TCP
+  - name: https
+    port: 9443
+    targetPort: https
+    protocol: TCP
+  - name: edge
+    port: 8000
+    targetPort: edge
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: portainer

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+  labels:
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/component: automation
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: home-assistant
+    spec:
+      containers:
+      - name: home-assistant
+        image: ghcr.io/home-assistant/home-assistant:stable
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8123
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "Asia/Jerusalem"
+        command:
+        - /init
+        args:
+        - bash
+        - -c
+        - wget -O - https://get.hacs.xyz | bash - 2>/dev/null || true && python -m homeassistant --config /config
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        securityContext:
+          privileged: true
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: home-assistant-config

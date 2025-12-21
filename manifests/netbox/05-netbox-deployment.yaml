@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox
+  namespace: netbox
+  labels:
+    app.kubernetes.io/name: netbox
+    app.kubernetes.io/component: ipam
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbox
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbox
+    spec:
+      containers:
+      - name: netbox
+        image: netboxcommunity/netbox:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "Asia/Jerusalem"
+        - name: SUPERUSER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: SUPERUSER_NAME
+        - name: SUPERUSER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: SUPERUSER_EMAIL
+        - name: SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: SUPERUSER_PASSWORD
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: SECRET_KEY
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: DB_HOST
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: DB_PASSWORD
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: netbox-secret
+              key: REDIS_PORT
+        - name: ALLOWED_HOSTS
+          value: "*"
+        volumeMounts:
+        - name: netbox-media
+          mountPath: /opt/netbox/netbox/media
+        - name: netbox-reports
+          mountPath: /opt/netbox/netbox/reports
+        - name: netbox-scripts
+          mountPath: /opt/netbox/netbox/scripts
+        livenessProbe:
+          httpGet:
+            path: /login/
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /login/
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+      volumes:
+      - name: netbox-media
+        persistentVolumeClaim:
+          claimName: netbox-media
+      - name: netbox-reports
+        persistentVolumeClaim:
+          claimName: netbox-reports
+      - name: netbox-scripts
+        persistentVolumeClaim:
+          claimName: netbox-scripts

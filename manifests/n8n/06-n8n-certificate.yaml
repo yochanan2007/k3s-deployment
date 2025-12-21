@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: n8n-k3s-dahan-house
+  namespace: n8n
+  labels:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/component: automation
+spec:
+  secretName: n8n-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+  - n8n.k3s.dahan.house
