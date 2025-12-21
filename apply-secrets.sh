@@ -66,6 +66,13 @@ kubectl create secret generic authentik-secret-key \
   -n authentik \
   --dry-run=client -o yaml | kubectl apply -f -
 
+# Create Cloudflare API token secret for cattle-system (Rancher)
+echo "Creating cloudflare-api-token secret in cattle-system namespace..."
+kubectl create secret generic cloudflare-api-token \
+  --from-literal=api-token=$CLOUDFLARE_API_TOKEN \
+  -n cattle-system \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo ""
 echo "✅ All secrets created successfully!"
 echo ""
