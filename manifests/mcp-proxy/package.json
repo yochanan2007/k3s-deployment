@@ -1,0 +1,26 @@
+{
+  "name": "k3s-mcp-proxy",
+  "version": "1.0.0",
+  "description": "MCP Proxy Server for k3s cluster services",
+  "main": "mcp-proxy-server.js",
+  "scripts": {
+    "start": "node mcp-proxy-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^4.21.2",
+    "axios": "^1.7.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "kubernetes",
+    "k3s",
+    "proxy"
+  ],
+  "author": "",
+  "license": "MIT"
+}

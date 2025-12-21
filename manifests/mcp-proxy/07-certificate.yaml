@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mcp-tls
+  namespace: mcp-proxy
+spec:
+  secretName: mcp-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - mcp.k3s.dahan.house
+---
