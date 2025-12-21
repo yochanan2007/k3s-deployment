@@ -26,22 +26,30 @@ Sensitive information (API tokens, passwords, domain names) should **NEVER** be 
    - `K3S_SUBDOMAIN`: Your K3s subdomain
    - `TRAEFIK_DASHBOARD_AUTH`: BasicAuth credentials (generate with `htpasswd`)
 
-## Current Secrets in Manifests
+4. **Copy `.env` file to k3s master node:**
+   ```bash
+   scp .env user@k3s-server:/path/to/k3s-deployment/
+   ```
 
-⚠️ **WARNING**: The following files currently contain hardcoded sensitive data and should be updated:
+5. **Apply secrets to cluster:**
+   ```bash
+   # On the k3s master node
+   cd /path/to/k3s-deployment
+   chmod +x apply-secrets.sh
+   ./apply-secrets.sh
+   ```
 
-### Files with Secrets:
-1. **`manifests/traefik/01-cloudflare-secret.yaml`**
-   - Contains: Cloudflare API token (base64 encoded)
-   - **Action Required**: Replace with actual token or use sealed secrets
+## Secret Management Approach
 
-2. **`manifests/cert-manager/01-cloudflare-secret.yaml`**
-   - Contains: Cloudflare API token placeholder
-   - **Action Required**: Update with actual token
+✅ **Secrets are now managed outside of Git:**
 
-3. **`manifests/traefik/03-dashboard-auth.yaml`**
-   - Contains: Traefik dashboard password hash
-   - **Action Required**: Generate new password with `htpasswd -nb admin yourpassword`
+The following secret files are **NOT tracked in Git**:
+1. **`manifests/traefik/01-cloudflare-secret.yaml`** - Cloudflare API token for Traefik
+2. **`manifests/cert-manager/01-cloudflare-secret.yaml`** - Cloudflare API token for cert-manager
+3. **`manifests/adguard/05-cloudflare-secret.yaml`** - Cloudflare API token for AdGuard
+4. **`manifests/traefik/03-dashboard-auth.yaml`** - Traefik dashboard authentication
+
+These secrets are created directly in the cluster using the `apply-secrets.sh` script, which reads values from your local `.env` file.
 
 ## Recommended: Use Sealed Secrets
 
@@ -77,25 +85,24 @@ git commit -m "Add sealed secret"
 
 ## Current Deployment State
 
-The manifests in this repository currently contain:
-- Base64-encoded secrets (NOT encryption, just encoding)
-- Hardcoded domain names
-- Specific IP addresses
+✅ **Secrets are now managed securely:**
+- Secret YAML files are NOT committed to Git (excluded via `.gitignore`)
+- Secrets are created from `.env` file using `apply-secrets.sh` script
+- `.env` file contains actual sensitive values and stays local only
+- Domain names and configuration remain in manifest files (non-sensitive)
 
-**For fresh deployments**, update these files with your actual values before applying to cluster.
+**For fresh deployments:**
+1. Copy `.env.example` to `.env` and fill in your values
+2. Copy `.env` to your k3s server
+3. Run `./apply-secrets.sh` on the k3s server to create secrets
 
 ## Migration Path
 
-To migrate to proper secret management:
+Current status: ✅ **Step 1 Complete**
 
-1. **Immediate**: Use `.env` file locally (not committed to Git)
-2. **Short-term**: Manually create secrets in cluster:
-   ```bash
-   kubectl create secret generic cloudflare-api-token \
-     --from-literal=api-token=$CLOUDFLARE_API_TOKEN \
-     -n kube-system
-   ```
-3. **Long-term**: Implement Sealed Secrets or External Secrets Operator
+1. ✅ **Immediate**: Secrets moved to `.env` file (not committed to Git)
+2. ✅ **Short-term**: Automated script (`apply-secrets.sh`) creates secrets in cluster
+3. **Long-term**: Consider implementing Sealed Secrets or External Secrets Operator for GitOps compatibility
 
 ## Questions?
 

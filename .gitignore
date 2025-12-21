@@ -14,6 +14,12 @@
 .env
 .env.local
 
+# Secret manifests (managed via apply-secrets.sh)
+manifests/traefik/01-cloudflare-secret.yaml
+manifests/cert-manager/01-cloudflare-secret.yaml
+manifests/adguard/05-cloudflare-secret.yaml
+manifests/traefik/03-dashboard-auth.yaml
+
 # Backup files
 *.bak
 *.backup
