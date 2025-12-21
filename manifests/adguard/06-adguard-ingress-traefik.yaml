@@ -4,9 +4,9 @@ metadata:
   name: adguard-ingress
   namespace: adguard
   annotations:
-    kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
+  ingressClassName: traefik
   rules:
     - host: adguard.k3s.dahan.house
       http:

@@ -11,9 +11,7 @@ data:
         enabled: false
       address: 0.0.0.0:80
       session_ttl: 720h
-    users:
-      - name: admin
-        password: $2a$10$qOvFz5rKVV5KvJWhQz5aXePqz8F8K8VvJz5rKVV5KvJWhQz5aXePq
+    users: []
     auth_attempts: 5
     block_auth_min: 15
     http_proxy: ""
