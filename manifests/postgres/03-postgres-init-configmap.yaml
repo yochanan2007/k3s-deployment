@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+data:
+  init.sql: |
+    -- Create netbox database and user
+    CREATE DATABASE netbox;
+    CREATE USER netbox WITH PASSWORD 'netbox';
+    GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;

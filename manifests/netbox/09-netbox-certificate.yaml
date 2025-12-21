@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbox-k3s-dahan-house
+  namespace: netbox
+  labels:
+    app.kubernetes.io/name: netbox
+    app.kubernetes.io/component: ipam
+spec:
+  secretName: netbox-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+  - netbox.k3s.dahan.house
