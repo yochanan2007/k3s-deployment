@@ -1,0 +1,34 @@
+# Fleet GitOps Configuration
+# This file tells Fleet how to deploy the manifests in this repository
+
+# Namespace where resources will be deployed
+# If not specified, Fleet will use the namespace from each manifest
+defaultNamespace: ""
+
+# Target customizations - paths to apply
+# By default, Fleet will apply all YAML files in the manifests/ directory
+paths:
+  - manifests/
+
+# Helm configuration (not needed for raw manifests)
+helm: {}
+
+# Kustomize configuration (not needed currently)
+kustomize: {}
+
+# Diff options - how Fleet determines if resources need updating
+diff:
+  # Compare patches - useful for resources managed by operators
+  comparePatches:
+  - apiVersion: apps/v1
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+    - /spec/template/spec/containers/0/image
+
+# Target restrictions - which clusters should receive these manifests
+# Empty means all clusters in the namespace where GitRepo is created
+targetCustomizations: []
+
+# Keep resources when GitRepo is deleted
+keepResources: false

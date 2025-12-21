@@ -1,0 +1,78 @@
+---
+# IMPORTANT: This is a HelmChartConfig resource that modifies the built-in k3s Traefik deployment
+# Apply with: kubectl apply -f 02-traefik-config.yaml
+# After applying, k3s will automatically update the Traefik deployment
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  failurePolicy: reinstall
+  valuesContent: |-
+    deployment:
+      podAnnotations:
+        prometheus.io/port: "8082"
+        prometheus.io/scrape: "true"
+
+    # Additional arguments for Traefik
+    additionalArguments:
+      # Let's Encrypt Configuration
+      - --certificatesresolvers.letsencrypt.acme.email=yochanan2007@gmail.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      # Dashboard API and insecure mode for internal access
+      - --api.dashboard=true
+      - --api.insecure=false
+
+    # Environment variables for Cloudflare
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: api-token
+
+    # Persistence for ACME certificates
+    persistence:
+      enabled: true
+      name: data
+      accessMode: ReadWriteOnce
+      size: 128Mi
+      path: /data
+
+    providers:
+      kubernetesIngress:
+        publishedService:
+          enabled: true
+      kubernetesCRD:
+        enabled: true
+        allowCrossNamespace: true
+
+    # Disable default dashboard ingress - we'll create our own
+    ingressRoute:
+      dashboard:
+        enabled: false
+
+    priorityClassName: "system-cluster-critical"
+
+    image:
+      repository: "rancher/mirrored-library-traefik"
+      tag: "3.5.1"
+
+    tolerations:
+    - key: "CriticalAddonsOnly"
+      operator: "Exists"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+    service:
+      ipFamilyPolicy: "PreferDualStack"
+      spec:
+        loadBalancerIP: "10.0.0.241"

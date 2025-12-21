@@ -1,0 +1,38 @@
+---
+# Fleet GitRepo Resource
+# This resource tells Fleet to watch the GitHub repository and automatically sync changes to the cluster
+#
+# To apply this configuration:
+# kubectl apply -f fleet-gitrepo.yaml
+#
+# To check status:
+# kubectl get gitrepo -n fleet-local
+# kubectl describe gitrepo k3s-manifests -n fleet-local
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: k3s-manifests
+  namespace: fleet-local
+spec:
+  # GitHub repository URL (HTTPS, no authentication needed for public repos)
+  repo: https://github.com/yochanan2007/k3s.git
+
+  # Branch to track
+  branch: main
+
+  # Paths within the repository to monitor
+  # Fleet will apply all YAML files found in these paths
+  paths:
+  - manifests/
+
+  # Polling interval (default is 15 seconds)
+  # Fleet checks for new commits at this interval
+  pollingInterval: 15s
+
+  # Target clusters
+  # Empty means deploy to the local cluster
+  targets: []
+
+  # Client secret for private repositories (not needed for public repos)
+  # clientSecretName: git-credentials

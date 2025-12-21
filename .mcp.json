@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "localproxy": {
+      "type": "http",
+      "url": "http://localhost:3006/mcp"
+    }
+  }
+}

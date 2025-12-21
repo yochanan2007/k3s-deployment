@@ -1,0 +1,22 @@
+# OS and Editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local development
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+
+# Claude agent files (local development only)
+.claude/
