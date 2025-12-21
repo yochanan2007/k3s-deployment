@@ -5,9 +5,12 @@ metadata:
   namespace: adguard
 data:
   AdGuardHome.yaml: |
-    bind_host: 0.0.0.0
-    bind_port: 80
-    beta_bind_port: 0
+    http:
+      pprof:
+        port: 6060
+        enabled: false
+      address: 0.0.0.0:80
+      session_ttl: 720h
     users:
       - name: admin
         password: $2a$10$qOvFz5rKVV5KvJWhQz5aXePqz8F8K8VvJz5rKVV5KvJWhQz5aXePq
@@ -17,7 +20,6 @@ data:
     language: ""
     theme: auto
     debug_pprof: false
-    web_session_ttl: 720
     dns:
       bind_hosts:
         - 0.0.0.0
@@ -147,4 +149,4 @@ data:
       group: ""
       user: ""
       rlimit_nofile: 0
-    schema_version: 27
+    schema_version: 29
