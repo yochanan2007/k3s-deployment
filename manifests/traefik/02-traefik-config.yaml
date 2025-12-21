@@ -74,5 +74,4 @@ spec:
 
     service:
       ipFamilyPolicy: "PreferDualStack"
-      spec:
-        loadBalancerIP: "10.0.0.241"
+      # IP will be auto-assigned from MetalLB pool (10.0.200.1-250)
