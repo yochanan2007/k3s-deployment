@@ -44,6 +44,28 @@ kubectl create secret generic traefik-dashboard-auth \
   -n kube-system \
   --dry-run=client -o yaml | kubectl apply -f -
 
+# Create Cloudflare API token secret for authentik
+echo "Creating cloudflare-api-token secret in authentik namespace..."
+kubectl create secret generic cloudflare-api-token \
+  --from-literal=api-token=$CLOUDFLARE_API_TOKEN \
+  -n authentik \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Create Authentik PostgreSQL credentials
+echo "Creating authentik-postgresql secret in authentik namespace..."
+kubectl create secret generic authentik-postgresql \
+  --from-literal=username=$AUTHENTIK_DB_USER \
+  --from-literal=password=$AUTHENTIK_DB_PASSWORD \
+  -n authentik \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Create Authentik secret key
+echo "Creating authentik-secret-key secret in authentik namespace..."
+kubectl create secret generic authentik-secret-key \
+  --from-literal=secret_key=$AUTHENTIK_SECRET_KEY \
+  -n authentik \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo ""
 echo "✅ All secrets created successfully!"
 echo ""

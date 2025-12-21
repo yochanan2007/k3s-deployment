@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-lb
+  namespace: authentik
+  labels:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/component: server
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "authentik"
+spec:
+  type: LoadBalancer
+  # IP will be auto-assigned from MetalLB pool (10.0.200.1-250)
+  selector:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/component: server
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9000
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 9443
+      protocol: TCP
+---
