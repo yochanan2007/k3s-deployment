@@ -2,7 +2,11 @@
 
 ## Overview
 
-Authentik is an open-source Identity Provider (IdP) focused on flexibility and versatility. This deployment follows the standard K3s deployment patterns with PostgreSQL and Redis as backend services.
+Authentik is an open-source Identity Provider (IdP) focused on flexibility and versatility. This deployment follows the standard K3s deployment patterns with PostgreSQL as the backend database.
+
+**Current Version**: 2025.10.3
+
+**Important**: Starting with version 2025.10, Authentik no longer requires Redis for caching. Redis has been removed from this deployment.
 
 ## Architecture
 
@@ -10,8 +14,6 @@ Authentik is an open-source Identity Provider (IdP) focused on flexibility and v
 authentik/
 ├── PostgreSQL 16 (StatefulSet)
 │   └── 10Gi persistent storage
-├── Redis 7 (StatefulSet)
-│   └── 1Gi persistent storage
 ├── Authentik Server (Deployment)
 │   └── Web interface on port 9000
 └── Authentik Worker (Deployment)
@@ -88,12 +90,13 @@ kubectl get certificate -n authentik
 The manifests are numbered to ensure proper deployment order:
 
 1. **00-namespace.yaml** - Creates `authentik` namespace
-2. **01-04** - PostgreSQL (PVC, StatefulSet, Service)
-3. **04-06** - Redis (PVC, StatefulSet, Service)
-4. **07-08** - Authentik (Server, Worker deployments)
-5. **09-10** - Services (ClusterIP, LoadBalancer)
-6. **11** - Ingress (Traefik)
-7. **12** - Certificate (Let's Encrypt)
+2. **01-03** - PostgreSQL (PVC, StatefulSet, Service)
+3. **07-08** - Authentik (Server, Worker deployments)
+4. **09-10** - Services (ClusterIP, LoadBalancer)
+5. **11** - Ingress (Traefik)
+6. **12** - Certificate (Let's Encrypt)
+
+**Note**: Redis manifests (04-06) have been removed as of Authentik 2025.10.3
 
 ### 5. Verify Services
 
@@ -105,7 +108,6 @@ kubectl get all -n authentik
 
 # Expected output:
 # - postgresql-0 (StatefulSet pod)
-# - redis-0 (StatefulSet pod)
 # - authentik-server-xxx (Deployment pod)
 # - authentik-worker-xxx (Deployment pod)
 
@@ -155,7 +157,6 @@ Without the trailing slash, you'll get a "Not Found" error.
 | authentik | ClusterIP | 80, 443 | Internal only |
 | authentik-lb | LoadBalancer | 80, 443 | Auto-assigned from MetalLB pool |
 | postgresql | ClusterIP | 5432 | Internal only |
-| redis | ClusterIP | 6379 | Internal only |
 
 ### Ingress
 
@@ -173,24 +174,12 @@ Without the trailing slash, you'll get a "Not Found" error.
 - **Access Mode**: ReadWriteOnce
 - **Provisioner**: K3s local-path-provisioner
 
-### Redis Data
-
-- **PVC**: redis-data
-- **Size**: 1Gi
-- **Access Mode**: ReadWriteOnce
-- **Provisioner**: K3s local-path-provisioner
-
 ## Resource Allocation
 
 ### PostgreSQL
 
 - **Requests**: 250m CPU, 256Mi memory
 - **Limits**: 1000m CPU, 1Gi memory
-
-### Redis
-
-- **Requests**: 100m CPU, 128Mi memory
-- **Limits**: 500m CPU, 512Mi memory
 
 ### Authentik Server
 
@@ -210,11 +199,6 @@ All services have properly configured health checks:
 
 - **Liveness**: pg_isready check every 10s
 - **Readiness**: pg_isready check every 10s
-
-### Redis
-
-- **Liveness**: redis-cli ping every 10s
-- **Readiness**: redis-cli ping every 5s
 
 ### Authentik Server
 
@@ -292,8 +276,8 @@ kubectl get svc authentik-lb -n authentik
 # Check worker logs
 kubectl logs -n authentik -l app.kubernetes.io/component=worker
 
-# Verify Redis connection
-kubectl exec -it -n authentik redis-0 -- redis-cli ping
+# Check worker health
+kubectl exec -it -n authentik -l app.kubernetes.io/component=worker -- ak healthcheck
 ```
 
 ## Backup and Restore
