@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustdesk-hbbs
+  namespace: rustdesk
+  labels:
+    app: rustdesk-hbbs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rustdesk-hbbs
+  template:
+    metadata:
+      labels:
+        app: rustdesk-hbbs
+    spec:
+      containers:
+        - name: hbbs
+          image: rustdesk/rustdesk-server:latest
+          command:
+            - hbbs
+            - -r
+            - rustdesk-lb.rustdesk.svc.cluster.local:21117
+          volumeMounts:
+            - name: data
+              mountPath: /root
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustdesk-data

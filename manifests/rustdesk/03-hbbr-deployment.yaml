@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustdesk-hbbr
+  namespace: rustdesk
+  labels:
+    app: rustdesk-hbbr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rustdesk-hbbr
+  template:
+    metadata:
+      labels:
+        app: rustdesk-hbbr
+    spec:
+      containers:
+        - name: hbbr
+          image: rustdesk/rustdesk-server:latest
+          command:
+            - hbbr
+          volumeMounts:
+            - name: data
+              mountPath: /root
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustdesk-data

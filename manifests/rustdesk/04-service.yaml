@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustdesk-lb
+  namespace: rustdesk
+spec:
+  type: LoadBalancer
+  selector:
+    app: rustdesk-hbbs # Selects the hbbs pod for most ports
+  ports:
+    - name: hbbs-tcp-rendezvous
+      protocol: TCP
+      port: 21115
+      targetPort: 21115
+    - name: hbbs-tcp-natt
+      protocol: TCP
+      port: 21116
+      targetPort: 21116
+    - name: hbbs-udp-natt
+      protocol: UDP
+      port: 21116
+      targetPort: 21116
+    - name: hbbs-tcp-api
+      protocol: TCP
+      port: 21118
+      targetPort: 21118
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustdesk-relay-lb
+  namespace: rustdesk
+spec:
+  type: LoadBalancer
+  selector:
+    app: rustdesk-hbbr # Selects the hbbr pod
+  ports:
+    - name: hbbr-tcp-relay
+      protocol: TCP
+      port: 21117
+      targetPort: 21117
+    - name: hbbr-tcp-websockets
+      protocol: TCP
+      port: 21119
+      targetPort: 21119
