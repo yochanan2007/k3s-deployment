@@ -1,0 +1,452 @@
+{
+  "name": "k3s-homelab-proxy",
+  "version": "1.0.0",
+  "description": "Extended MCP server configuration for k3s homelab services",
+  "servers": [
+    {
+      "name": "k3s-cluster",
+      "host": "10.0.0.210",
+      "user": "johnd",
+      "ssh_key_path": "~/.ssh/id_rsa"
+    }
+  ],
+  "services": {
+    "authentik": {
+      "enabled": true,
+      "name": "Authentik SSO",
+      "type": "kubernetes",
+      "namespace": "authentik",
+      "api": {
+        "base_url": "https://auth.k3s.dahan.house/api/v3",
+        "internal_url": "http://authentik.authentik.svc.cluster.local:80/api/v3",
+        "auth_type": "bearer_token",
+        "token_env": "AUTHENTIK_API_TOKEN",
+        "verify_ssl": true
+      },
+      "endpoints": {
+        "users": "/core/users/",
+        "applications": "/core/applications/",
+        "providers": "/providers/oauth2/",
+        "flows": "/flows/instances/",
+        "events": "/events/events/",
+        "groups": "/core/groups/",
+        "tokens": "/core/tokens/"
+      },
+      "tools": [
+        {
+          "name": "authentik_api-call",
+          "description": "Execute generic Authentik REST API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)",
+            "params": "object (optional)"
+          }
+        },
+        {
+          "name": "authentik_list-users",
+          "description": "List all users or search users",
+          "parameters": {
+            "search": "string (optional)",
+            "is_active": "boolean (optional)",
+            "ordering": "string (optional)"
+          }
+        },
+        {
+          "name": "authentik_create-user",
+          "description": "Create new Authentik user",
+          "parameters": {
+            "username": "string (required)",
+            "email": "string (required)",
+            "name": "string (required)",
+            "password": "string (optional)",
+            "is_active": "boolean (default: true)"
+          }
+        },
+        {
+          "name": "authentik_list-applications",
+          "description": "List all OAuth/OIDC applications",
+          "parameters": {
+            "search": "string (optional)"
+          }
+        },
+        {
+          "name": "authentik_query-events",
+          "description": "Query audit events/logs",
+          "parameters": {
+            "action": "string (optional, e.g., 'login', 'logout')",
+            "user": "string (optional, username)",
+            "ordering": "string (default: '-created')"
+          }
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 9000,
+        "remote_port": 80,
+        "service": "authentik.authentik.svc.cluster.local"
+      }
+    },
+    "portainer": {
+      "enabled": true,
+      "name": "Portainer Container Management",
+      "type": "kubernetes",
+      "namespace": "portainer",
+      "api": {
+        "base_url": "https://portainer.k3s.dahan.house/api",
+        "internal_url": "http://portainer.portainer.svc.cluster.local:9000/api",
+        "auth_type": "jwt_token",
+        "token_env": "PORTAINER_API_TOKEN",
+        "verify_ssl": true
+      },
+      "endpoints": {
+        "status": "/status",
+        "endpoints": "/endpoints",
+        "stacks": "/stacks",
+        "containers": "/endpoints/{endpoint_id}/docker/containers/json",
+        "volumes": "/endpoints/{endpoint_id}/docker/volumes",
+        "networks": "/endpoints/{endpoint_id}/docker/networks",
+        "images": "/endpoints/{endpoint_id}/docker/images/json"
+      },
+      "tools": [
+        {
+          "name": "portainer_api-call",
+          "description": "Execute Portainer REST API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "portainer_list-containers",
+          "description": "List all containers on endpoint",
+          "parameters": {
+            "endpoint_id": "integer (default: 1)",
+            "all": "boolean (default: true)"
+          }
+        },
+        {
+          "name": "portainer_list-stacks",
+          "description": "List all stacks (compose deployments)",
+          "parameters": {
+            "filters": "object (optional)"
+          }
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 9000,
+        "remote_port": 9000,
+        "service": "portainer.portainer.svc.cluster.local"
+      }
+    },
+    "rancher": {
+      "enabled": true,
+      "name": "Rancher Cluster Management",
+      "type": "kubernetes",
+      "namespace": "cattle-system",
+      "api": {
+        "base_url": "https://rancher.k3s.dahan.house/v3",
+        "internal_url": "https://rancher.cattle-system.svc.cluster.local/v3",
+        "auth_type": "bearer_token",
+        "token_env": "RANCHER_API_TOKEN",
+        "verify_ssl": true
+      },
+      "endpoints": {
+        "clusters": "/clusters",
+        "projects": "/projects",
+        "namespaces": "/cluster/{cluster_id}/namespaces",
+        "nodes": "/nodes",
+        "workloads": "/project/{project_id}/workloads",
+        "pods": "/clusters/{cluster_id}/pods",
+        "users": "/users",
+        "tokens": "/tokens"
+      },
+      "tools": [
+        {
+          "name": "rancher_api-call",
+          "description": "Execute Rancher REST API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "rancher_list-clusters",
+          "description": "List all managed clusters",
+          "parameters": {
+            "filters": "object (optional)"
+          }
+        },
+        {
+          "name": "rancher_list-workloads",
+          "description": "List workloads in project",
+          "parameters": {
+            "project_id": "string (required)",
+            "type": "string (optional, e.g., 'deployment', 'statefulset')"
+          }
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 8443,
+        "remote_port": 443,
+        "service": "rancher.cattle-system.svc.cluster.local"
+      }
+    },
+    "adguard": {
+      "enabled": true,
+      "name": "AdGuard Home DNS",
+      "type": "kubernetes",
+      "namespace": "adguard",
+      "api": {
+        "base_url": "https://adguard.k3s.dahan.house/control",
+        "internal_url": "http://adguard.adguard.svc.cluster.local:80/control",
+        "auth_type": "basic_auth",
+        "username_env": "ADGUARD_USERNAME",
+        "password_env": "ADGUARD_PASSWORD",
+        "verify_ssl": true
+      },
+      "endpoints": {
+        "status": "/status",
+        "stats": "/stats",
+        "query_log": "/querylog",
+        "filtering": "/filtering/status",
+        "safebrowsing": "/safebrowsing/status",
+        "parental": "/parental/status",
+        "blocked_services": "/blocked_services/list",
+        "rewrite": "/rewrite/list",
+        "clients": "/clients"
+      },
+      "tools": [
+        {
+          "name": "adguard_api-call",
+          "description": "Execute AdGuard Home API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "adguard_get-stats",
+          "description": "Get DNS query statistics",
+          "parameters": {
+            "interval": "string (optional, e.g., '24h', '7d')"
+          }
+        },
+        {
+          "name": "adguard_query-log",
+          "description": "Query DNS query log",
+          "parameters": {
+            "older_than": "string (optional, timestamp)",
+            "filter_domain": "string (optional)"
+          }
+        },
+        {
+          "name": "adguard_get-status",
+          "description": "Get AdGuard Home status",
+          "parameters": {}
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 3000,
+        "remote_port": 80,
+        "service": "adguard.adguard.svc.cluster.local"
+      }
+    },
+    "homeassistant": {
+      "enabled": true,
+      "name": "Home Assistant",
+      "type": "external",
+      "api": {
+        "base_url": "https://homeassistant.k3s.dahan.house/api",
+        "auth_type": "bearer_token",
+        "token_env": "HOMEASSISTANT_API_TOKEN",
+        "verify_ssl": true
+      },
+      "endpoints": {
+        "status": "/",
+        "config": "/config",
+        "states": "/states",
+        "states_entity": "/states/{entity_id}",
+        "events": "/events",
+        "services": "/services",
+        "history": "/history/period/{timestamp}",
+        "logbook": "/logbook/{timestamp}",
+        "error_log": "/error_log",
+        "camera_proxy": "/camera_proxy/{entity_id}"
+      },
+      "tools": [
+        {
+          "name": "homeassistant_api-call",
+          "description": "Execute Home Assistant REST API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "homeassistant_get-states",
+          "description": "Get all entity states",
+          "parameters": {
+            "entity_id": "string (optional)"
+          }
+        },
+        {
+          "name": "homeassistant_call-service",
+          "description": "Call Home Assistant service",
+          "parameters": {
+            "domain": "string (required, e.g., 'light', 'switch')",
+            "service": "string (required, e.g., 'turn_on', 'turn_off')",
+            "entity_id": "string (optional)",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "homeassistant_get-history",
+          "description": "Get entity history",
+          "parameters": {
+            "entity_id": "string (optional)",
+            "start_time": "string (ISO timestamp)",
+            "end_time": "string (optional)"
+          }
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 8123,
+        "remote_port": 8123,
+        "service": null,
+        "comment": "External service, not in k3s cluster"
+      }
+    },
+    "proxmox": {
+      "enabled": true,
+      "name": "Proxmox Virtual Environment",
+      "type": "external",
+      "api": {
+        "base_url": "https://proxmox.dahan.house:8006/api2/json",
+        "auth_type": "pve_ticket",
+        "token_env": "PROXMOX_API_TOKEN",
+        "token_secret_env": "PROXMOX_API_SECRET",
+        "verify_ssl": false,
+        "comment": "Proxmox often uses self-signed certificates"
+      },
+      "endpoints": {
+        "version": "/version",
+        "cluster_status": "/cluster/status",
+        "nodes": "/nodes",
+        "node_status": "/nodes/{node}/status",
+        "vms": "/nodes/{node}/qemu",
+        "vm_status": "/nodes/{node}/qemu/{vmid}/status/current",
+        "containers": "/nodes/{node}/lxc",
+        "storage": "/nodes/{node}/storage",
+        "networks": "/nodes/{node}/network",
+        "tasks": "/nodes/{node}/tasks"
+      },
+      "tools": [
+        {
+          "name": "proxmox_api-call",
+          "description": "Execute Proxmox VE API call",
+          "parameters": {
+            "method": ["GET", "POST", "PUT", "DELETE"],
+            "endpoint": "string",
+            "data": "object (optional)"
+          }
+        },
+        {
+          "name": "proxmox_list-vms",
+          "description": "List all VMs on node",
+          "parameters": {
+            "node": "string (required, e.g., 'pve')",
+            "type": "string (optional, 'qemu' or 'lxc')"
+          }
+        },
+        {
+          "name": "proxmox_get-vm-status",
+          "description": "Get VM status",
+          "parameters": {
+            "node": "string (required)",
+            "vmid": "integer (required)"
+          }
+        },
+        {
+          "name": "proxmox_vm-action",
+          "description": "Control VM (start/stop/shutdown/reboot)",
+          "parameters": {
+            "node": "string (required)",
+            "vmid": "integer (required)",
+            "action": ["start", "stop", "shutdown", "reboot", "suspend", "resume"]
+          }
+        }
+      ],
+      "port_forward": {
+        "enabled": false,
+        "local_port": 8006,
+        "remote_port": 8006,
+        "service": null,
+        "comment": "External service, accessed directly"
+      }
+    }
+  },
+  "environment_variables": {
+    "required": [
+      "AUTHENTIK_API_TOKEN",
+      "PORTAINER_API_TOKEN",
+      "RANCHER_API_TOKEN",
+      "ADGUARD_USERNAME",
+      "ADGUARD_PASSWORD",
+      "HOMEASSISTANT_API_TOKEN",
+      "PROXMOX_API_TOKEN",
+      "PROXMOX_API_SECRET"
+    ],
+    "storage": {
+      "method": "dotenv",
+      "file_path": ".env",
+      "description": "Store all API tokens and credentials in .env file (NOT committed to git)"
+    }
+  },
+  "implementation_notes": {
+    "authentication_flow": {
+      "bearer_token": "Add 'Authorization: Bearer <token>' header to all requests",
+      "jwt_token": "Add 'X-API-Key: <token>' header to all requests",
+      "basic_auth": "Add 'Authorization: Basic <base64(username:password)>' header",
+      "pve_ticket": "Use /access/ticket endpoint to get ticket, then use in Cookie header"
+    },
+    "error_handling": {
+      "401": "Unauthorized - check token validity",
+      "403": "Forbidden - check token permissions/scopes",
+      "404": "Not found - check endpoint path",
+      "429": "Rate limited - implement backoff",
+      "500": "Server error - check service health"
+    },
+    "best_practices": [
+      "Always use HTTPS for external API calls",
+      "Implement token rotation every 90 days",
+      "Use least-privilege principles for token scopes",
+      "Log all API calls for audit purposes",
+      "Implement retry logic with exponential backoff",
+      "Cache responses when appropriate (respect cache headers)",
+      "Validate SSL certificates except for Proxmox (self-signed common)"
+    ]
+  },
+  "example_mcp_tool_implementations": {
+    "authentik_list_users": {
+      "description": "Example implementation for authentik_list-users tool",
+      "code": "async function authentik_list_users(params) {\n  const url = new URL('/core/users/', process.env.AUTHENTIK_BASE_URL);\n  if (params.search) url.searchParams.append('search', params.search);\n  if (params.is_active !== undefined) url.searchParams.append('is_active', params.is_active);\n  \n  const response = await fetch(url, {\n    headers: {\n      'Authorization': `Bearer ${process.env.AUTHENTIK_API_TOKEN}`,\n      'Content-Type': 'application/json'\n    }\n  });\n  \n  if (!response.ok) {\n    throw new Error(`Authentik API error: ${response.status} ${response.statusText}`);\n  }\n  \n  return await response.json();\n}"
+    },
+    "portainer_list_containers": {
+      "description": "Example implementation for portainer_list-containers tool",
+      "code": "async function portainer_list_containers(params) {\n  const endpoint_id = params.endpoint_id || 1;\n  const url = `${process.env.PORTAINER_BASE_URL}/endpoints/${endpoint_id}/docker/containers/json?all=${params.all || true}`;\n  \n  const response = await fetch(url, {\n    headers: {\n      'X-API-Key': process.env.PORTAINER_API_TOKEN\n    }\n  });\n  \n  if (!response.ok) {\n    throw new Error(`Portainer API error: ${response.status} ${response.statusText}`);\n  }\n  \n  return await response.json();\n}"
+    },
+    "homeassistant_call_service": {
+      "description": "Example implementation for homeassistant_call-service tool",
+      "code": "async function homeassistant_call_service(params) {\n  const url = `${process.env.HOMEASSISTANT_BASE_URL}/services/${params.domain}/${params.service}`;\n  \n  const body = {\n    entity_id: params.entity_id,\n    ...params.data\n  };\n  \n  const response = await fetch(url, {\n    method: 'POST',\n    headers: {\n      'Authorization': `Bearer ${process.env.HOMEASSISTANT_API_TOKEN}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify(body)\n  });\n  \n  if (!response.ok) {\n    throw new Error(`Home Assistant API error: ${response.status} ${response.statusText}`);\n  }\n  \n  return await response.json();\n}"
+    }
+  }
+}
