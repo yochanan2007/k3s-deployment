@@ -159,3 +159,4 @@ kubectl apply -f manifests/adguard/
 4. **Rancher Not Included**: Rancher manifests are not in this repository. Only AdGuard, Traefik, and cert-manager configs are tracked.
 
 5. **Domain Dependencies**: All domains (dahan.house, *.k3s.dahan.house) must resolve to correct MetalLB IPs for ingress to work.
+push edit only to claude-edits branch, the merge to main done manully unless i specific told you otherwise

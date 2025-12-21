@@ -35,22 +35,30 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /opt/adguardhome/conf
+            - name: adguard-config-file
+              mountPath: /opt/adguardhome/conf/AdGuardHome.yaml
+              subPath: AdGuardHome.yaml
             - name: data
               mountPath: /opt/adguardhome/work
           livenessProbe:
             tcpSocket:
               port: 80
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 10
+            failureThreshold: 5
           readinessProbe:
             tcpSocket:
               port: 80
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
             periodSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: adguard-config
+        - name: adguard-config-file
+          configMap:
+            name: adguard-config
         - name: data
           persistentVolumeClaim:
             claimName: adguard-data

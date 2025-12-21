@@ -8,7 +8,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: dahan.house     # set this in your LAN DNS / hosts
+    - host: adguard.k3s.dahan.house
       http:
         paths:
           - path: /
