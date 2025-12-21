@@ -24,6 +24,10 @@ spec:
       protocol: TCP
       port: 21118
       targetPort: 21118
+    - name: hbbs-tcp-webconsole
+      protocol: TCP
+      port: 21114
+      targetPort: 21114
 ---
 apiVersion: v1
 kind: Service
