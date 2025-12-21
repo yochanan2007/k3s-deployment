@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-proxy-server
+  namespace: mcp-proxy
+  labels:
+    app.kubernetes.io/name: mcp-proxy
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcp-proxy
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mcp-proxy
+        app.kubernetes.io/component: server
+    spec:
+      serviceAccountName: mcp-proxy
+      containers:
+        - name: mcp-proxy
+          image: mcp-proxy:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3010
+              protocol: TCP
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mcp-proxy-config
+                  key: PORT
+            - name: TRANSPORT_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: mcp-proxy-config
+                  key: TRANSPORT_MODE
+            - name: CONFIG_REPO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mcp-proxy-config
+                  key: CONFIG_REPO_URL
+            - name: AUTHENTIK_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-api-tokens
+                  key: AUTHENTIK_API_TOKEN
+                  optional: true
+            - name: RANCHER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-api-tokens
+                  key: RANCHER_API_TOKEN
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
+      restartPolicy: Always
+---

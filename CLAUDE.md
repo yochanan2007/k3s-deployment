@@ -39,6 +39,26 @@ The cluster is accessible through MCP (Model Context Protocol) configured in `.m
 mcp__localproxy__k3s_execute-command: kubectl get pods -A
 ```
 
+### Direct SSH Access
+
+For direct terminal access to the servers, use these SSH commands with the private key:
+
+**K3s Cluster:**
+```bash
+ssh -i "C:/Users/John/.ssh/docker_key" johnd@10.0.0.210
+```
+- User: `johnd`
+- Access: kubectl commands for cluster management
+
+**Docker2 Host:**
+```bash
+ssh -i "C:/Users/John/.ssh/docker_key" root@docker2
+```
+- User: `root`
+- Access: Docker daemon and container management
+
+**Note:** The hostname `docker2` must resolve to 10.0.0.120 in your hosts file or DNS.
+
 ### Verification Workflow
 
 When updating manifests, always verify against the running cluster:

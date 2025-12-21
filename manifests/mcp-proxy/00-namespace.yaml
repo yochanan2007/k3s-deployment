@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mcp-proxy
+  labels:
+    name: mcp-proxy
+    app.kubernetes.io/name: mcp-proxy
+    app.kubernetes.io/component: infrastructure
+---

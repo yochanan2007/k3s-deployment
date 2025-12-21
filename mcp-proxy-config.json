@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "description": "MCP Proxy configuration for k3s cluster services",
+  "services": {
+    "adguard": {
+      "url": "http://adguard.adguard.svc.cluster.local",
+      "port": 80,
+      "description": "AdGuard Home DNS filtering and ad blocking"
+    },
+    "authentik": {
+      "url": "http://authentik.authentik.svc.cluster.local",
+      "port": 80,
+      "description": "Authentik SSO and identity management"
+    },
+    "postgresql": {
+      "url": "postgresql://postgresql.authentik.svc.cluster.local:5432",
+      "port": 5432,
+      "description": "PostgreSQL database for Authentik"
+    },
+    "rancher": {
+      "url": "http://rancher.cattle-system.svc.cluster.local",
+      "port": 80,
+      "description": "Rancher cluster management"
+    },
+    "rustdesk": {
+      "url": "http://rustdesk-lb.rustdesk.svc.cluster.local",
+      "port": 21114,
+      "description": "RustDesk remote desktop server"
+    },
+    "kubernetes": {
+      "url": "https://kubernetes.default.svc.cluster.local",
+      "port": 443,
+      "description": "Kubernetes API server"
+    }
+  },
+  "tools": {
+    "kubernetes_enabled": true,
+    "adguard_enabled": true,
+    "authentik_enabled": true,
+    "postgres_enabled": true,
+    "rancher_enabled": true,
+    "rustdesk_enabled": false
+  },
+  "security": {
+    "require_authentication": false,
+    "allowed_namespaces": [
+      "adguard",
+      "authentik",
+      "cattle-system",
+      "rustdesk",
+      "kube-system",
+      "default"
+    ]
+  },
+  "features": {
+    "auto_reload_config": true,
+    "config_reload_interval_seconds": 300,
+    "enable_health_checks": true,
+    "enable_metrics": true
+  }
+}
