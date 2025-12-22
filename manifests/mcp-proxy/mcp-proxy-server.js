@@ -282,6 +282,54 @@ class K3sMCPProxyServer {
         );
       }
 
+      // Portainer tools
+      if (this.config?.tools?.portainer_enabled !== false) {
+        tools.push(
+          {
+            name: 'portainer_get_status',
+            description: 'Get Portainer server status and information',
+            inputSchema: {
+              type: 'object',
+              properties: {},
+            },
+          },
+          {
+            name: 'portainer_list_endpoints',
+            description: 'List all endpoints (Docker/Kubernetes environments) in Portainer',
+            inputSchema: {
+              type: 'object',
+              properties: {},
+            },
+          },
+          {
+            name: 'portainer_list_containers',
+            description: 'List containers in a Portainer endpoint',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                endpoint_id: {
+                  type: 'number',
+                  description: 'Endpoint ID (default: 1 for local)',
+                },
+              },
+            },
+          },
+          {
+            name: 'portainer_list_stacks',
+            description: 'List all stacks in Portainer',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                endpoint_id: {
+                  type: 'number',
+                  description: 'Endpoint ID (default: 1 for local)',
+                },
+              },
+            },
+          }
+        );
+      }
+
       return { tools };
     });
 
@@ -322,6 +370,16 @@ class K3sMCPProxyServer {
           // Rancher tools
           case 'rancher_get_clusters':
             return await this.rancherGetClusters(args);
+
+          // Portainer tools
+          case 'portainer_get_status':
+            return await this.portainerGetStatus(args);
+          case 'portainer_list_endpoints':
+            return await this.portainerListEndpoints(args);
+          case 'portainer_list_containers':
+            return await this.portainerListContainers(args);
+          case 'portainer_list_stacks':
+            return await this.portainerListStacks(args);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -625,6 +683,161 @@ class K3sMCPProxyServer {
           {
             type: 'text',
             text: `Rancher API not accessible: ${error.message}. Ensure RANCHER_API_TOKEN is set.`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  // Portainer tool implementations
+  async getPortainerToken() {
+    // Cache token for performance
+    if (this.portainerToken && this.portainerTokenExpiry > Date.now()) {
+      return this.portainerToken;
+    }
+
+    try {
+      const portainerUrl = this.config?.services?.portainer?.url || 'http://portainer.portainer.svc.cluster.local:9000';
+      const response = await axios.post(`${portainerUrl}/api/auth`, {
+        username: process.env.PORTAINER_USERNAME || 'admin',
+        password: process.env.PORTAINER_PASSWORD || '',
+      });
+
+      this.portainerToken = response.data.jwt;
+      this.portainerTokenExpiry = Date.now() + (8 * 60 * 60 * 1000); // 8 hours
+      return this.portainerToken;
+    } catch (error) {
+      throw new Error(`Failed to authenticate with Portainer: ${error.message}`);
+    }
+  }
+
+  async portainerGetStatus(args) {
+    try {
+      const token = await this.getPortainerToken();
+      const portainerUrl = this.config?.services?.portainer?.url || 'http://portainer.portainer.svc.cluster.local:9000';
+
+      const response = await axios.get(`${portainerUrl}/api/status`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(response.data, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Portainer API not accessible: ${error.message}. Ensure PORTAINER_USERNAME and PORTAINER_PASSWORD are set.`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  async portainerListEndpoints(args) {
+    try {
+      const token = await this.getPortainerToken();
+      const portainerUrl = this.config?.services?.portainer?.url || 'http://portainer.portainer.svc.cluster.local:9000';
+
+      const response = await axios.get(`${portainerUrl}/api/endpoints`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(response.data, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to list Portainer endpoints: ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  async portainerListContainers(args) {
+    try {
+      const token = await this.getPortainerToken();
+      const portainerUrl = this.config?.services?.portainer?.url || 'http://portainer.portainer.svc.cluster.local:9000';
+      const endpointId = args.endpoint_id || 1;
+
+      const response = await axios.get(`${portainerUrl}/api/endpoints/${endpointId}/docker/containers/json?all=true`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(response.data, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to list containers: ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  async portainerListStacks(args) {
+    try {
+      const token = await this.getPortainerToken();
+      const portainerUrl = this.config?.services?.portainer?.url || 'http://portainer.portainer.svc.cluster.local:9000';
+      const endpointId = args.endpoint_id || 1;
+
+      const response = await axios.get(`${portainerUrl}/api/stacks`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          filters: JSON.stringify({ EndpointID: endpointId }),
+        },
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(response.data, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to list stacks: ${error.message}`,
           },
         ],
         isError: true,

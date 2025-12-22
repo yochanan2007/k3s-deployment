@@ -107,6 +107,14 @@
       "requiresAuth": false
     }
   },
+  "tools": {
+    "kubernetes_enabled": true,
+    "adguard_enabled": true,
+    "postgres_enabled": true,
+    "authentik_enabled": true,
+    "rancher_enabled": true,
+    "portainer_enabled": true
+  },
   "configReloadInterval": 300,
   "healthCheckInterval": 60
 }
