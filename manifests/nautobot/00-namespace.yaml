@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nautobot
+  labels:
+    app.kubernetes.io/name: nautobot
+    app.kubernetes.io/component: ipam
