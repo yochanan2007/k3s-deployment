@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nautobot-media
+  namespace: nautobot
+  labels:
+    app.kubernetes.io/name: nautobot
+    app.kubernetes.io/component: ipam
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nautobot-static
+  namespace: nautobot
+  labels:
+    app.kubernetes.io/name: nautobot
+    app.kubernetes.io/component: ipam
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path

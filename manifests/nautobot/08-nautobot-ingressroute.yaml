@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nautobot
+  namespace: nautobot
+  labels:
+    app.kubernetes.io/name: nautobot
+    app.kubernetes.io/component: ipam
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`nautobot.k3s.dahan.house`)
+      services:
+        - name: nautobot
+          port: 8080
+  tls:
+    secretName: nautobot-tls

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nautobot-lb
+  namespace: nautobot
+  labels:
+    app.kubernetes.io/name: nautobot
+    app.kubernetes.io/component: ipam
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: nautobot
