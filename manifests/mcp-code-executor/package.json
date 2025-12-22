@@ -1,0 +1,25 @@
+{
+  "name": "k3s-code-executor",
+  "version": "1.0.0",
+  "description": "Token-efficient code execution MCP server for k3s services",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "code-execution",
+    "portainer",
+    "k3s"
+  ],
+  "author": "",
+  "license": "MIT"
+}

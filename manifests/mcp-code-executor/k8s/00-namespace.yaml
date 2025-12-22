@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mcp-executor
+  labels:
+    app.kubernetes.io/name: mcp-executor
+    app.kubernetes.io/component: code-execution

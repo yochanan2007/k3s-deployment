@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mcp-executor-tls
+  namespace: mcp-executor
+  labels:
+    app.kubernetes.io/name: mcp-executor
+spec:
+  secretName: mcp-executor-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+  - mcp-executor.k3s.dahan.house

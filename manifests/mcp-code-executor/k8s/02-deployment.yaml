@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-code-executor
+  namespace: mcp-executor
+  labels:
+    app.kubernetes.io/name: mcp-executor
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcp-executor
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mcp-executor
+        app.kubernetes.io/component: server
+    spec:
+      containers:
+        - name: code-executor
+          image: mcp-code-executor:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3020
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3020"
+            - name: TRANSPORT_MODE
+              value: "http"
+            - name: PORTAINER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-executor-env
+                  key: PORTAINER_URL
+            - name: PORTAINER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-executor-env
+                  key: PORTAINER_USERNAME
+            - name: PORTAINER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-executor-env
+                  key: PORTAINER_PASSWORD
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
+      restartPolicy: Always
