@@ -11,7 +11,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`home-assistant.k3s.dahan.house`)
+      match: Host(`home.k3s.dahan.house`)
       services:
         - name: home-assistant
           port: 8123
