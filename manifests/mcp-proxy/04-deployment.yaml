@@ -43,18 +43,67 @@ spec:
                 configMapKeyRef:
                   name: mcp-proxy-config
                   key: CONFIG_REPO_URL
+            # Service credentials from mcp-proxy-env secret
+            - name: ADGUARD_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: ADGUARD_USERNAME
+            - name: ADGUARD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: ADGUARD_PASSWORD
             - name: AUTHENTIK_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: mcp-proxy-api-tokens
+                  name: mcp-proxy-env
                   key: AUTHENTIK_API_TOKEN
-                  optional: true
             - name: RANCHER_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: mcp-proxy-api-tokens
+                  name: mcp-proxy-env
                   key: RANCHER_API_TOKEN
-                  optional: true
+            - name: HOMEASSISTANT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: HOMEASSISTANT_TOKEN
+            - name: N8N_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: N8N_API_KEY
+            - name: PORTAINER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: PORTAINER_USERNAME
+            - name: PORTAINER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: PORTAINER_PASSWORD
+            - name: NAUTOBOT_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: NAUTOBOT_API_TOKEN
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: POSTGRES_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: POSTGRES_PASSWORD
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-proxy-env
+                  key: GITHUB_TOKEN
           livenessProbe:
             httpGet:
               path: /health
