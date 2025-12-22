@@ -20,6 +20,12 @@
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const { SSEServerTransport } = require('@modelcontextprotocol/sdk/server/sse.js');
+const {
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema
+} = require('@modelcontextprotocol/sdk/types.js');
 const express = require('express');
 const axios = require('axios');
 const { exec } = require('child_process');
@@ -101,7 +107,7 @@ class K3sMCPProxyServer {
 
   setupHandlers() {
     // List available tools
-    this.server.setRequestHandler('tools/list', async () => {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       const tools = [];
 
       // Kubernetes tools
@@ -280,7 +286,7 @@ class K3sMCPProxyServer {
     });
 
     // Handle tool calls
-    this.server.setRequestHandler('tools/call', async (request) => {
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
       try {
@@ -334,7 +340,7 @@ class K3sMCPProxyServer {
     });
 
     // List available resources
-    this.server.setRequestHandler('resources/list', async () => {
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
       return {
         resources: [
           {
@@ -354,7 +360,7 @@ class K3sMCPProxyServer {
     });
 
     // Read resources
-    this.server.setRequestHandler('resources/read', async (request) => {
+    this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       const { uri } = request.params;
 
       if (uri === 'k3s://cluster/status') {
