@@ -36,6 +36,11 @@ spec:
                 secretKeyRef:
                   name: mcp-executor-env
                   key: PORTAINER_URL
+            - name: PORTAINER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-executor-env
+                  key: PORTAINER_API_TOKEN
             - name: PORTAINER_USERNAME
               valueFrom:
                 secretKeyRef:

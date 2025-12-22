@@ -15,13 +15,26 @@ class PortainerClient:
 
     def __init__(self):
         self.base_url = os.getenv('PORTAINER_URL', 'http://portainer.portainer.svc.cluster.local:9000')
+
+        # Support both API token (preferred) and username/password
+        self.api_token = os.getenv('PORTAINER_API_TOKEN', '')
         self.username = os.getenv('PORTAINER_USERNAME', 'admin')
         self.password = os.getenv('PORTAINER_PASSWORD', '')
+
         self._token = None
-        self._authenticate()
+
+        if self.api_token:
+            # Use API token directly (no need to authenticate)
+            self._token = self.api_token
+        else:
+            # Fall back to username/password authentication
+            self._authenticate()
 
     def _authenticate(self):
-        """Authenticate and get JWT token."""
+        """Authenticate with username/password and get JWT token."""
+        if not self.password:
+            raise ValueError('Either PORTAINER_API_TOKEN or PORTAINER_PASSWORD must be set')
+
         response = requests.post(
             f'{self.base_url}/api/auth',
             json={'username': self.username, 'password': self.password}
