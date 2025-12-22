@@ -4,7 +4,7 @@ metadata:
   name: mcp-proxy-config
   namespace: mcp-proxy
 data:
-  CONFIG_REPO_URL: "https://raw.githubusercontent.com/yourusername/k3s-deployment/main/mcp-proxy-config.json"
+  CONFIG_REPO_URL: "https://raw.githubusercontent.com/yochanan2007/k3s-deployment/main/mcp-config/services-config.json"
   PORT: "3010"
   TRANSPORT_MODE: "http"
 ---

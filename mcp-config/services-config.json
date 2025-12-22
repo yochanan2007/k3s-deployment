@@ -1,0 +1,112 @@
+{
+  "services": {
+    "adguard": {
+      "enabled": true,
+      "url": "http://adguard.adguard.svc.cluster.local:80",
+      "externalUrl": "http://10.0.0.240",
+      "type": "adguard",
+      "description": "AdGuard Home DNS filtering",
+      "apiPath": "/control",
+      "requiresAuth": true,
+      "authType": "basic",
+      "username": "${ADGUARD_USERNAME}",
+      "password": "${ADGUARD_PASSWORD}"
+    },
+    "authentik": {
+      "enabled": true,
+      "url": "http://authentik.authentik.svc.cluster.local:9000",
+      "externalUrl": "https://auth.k3s.dahan.house",
+      "type": "authentik",
+      "description": "Authentik SSO/Identity Provider",
+      "apiPath": "/api/v3",
+      "requiresAuth": true,
+      "authType": "token",
+      "token": "${AUTHENTIK_API_TOKEN}"
+    },
+    "rancher": {
+      "enabled": true,
+      "url": "https://rancher.rancher.svc.cluster.local",
+      "externalUrl": "https://rancher.k3s.dahan.house",
+      "type": "rancher",
+      "description": "Rancher Kubernetes Management",
+      "apiPath": "/v3",
+      "requiresAuth": true,
+      "authType": "token",
+      "token": "${RANCHER_API_TOKEN}"
+    },
+    "home-assistant": {
+      "enabled": true,
+      "url": "http://home-assistant.home-assistant.svc.cluster.local:8123",
+      "externalUrl": "https://home.k3s.dahan.house",
+      "type": "homeassistant",
+      "description": "Home Assistant automation",
+      "apiPath": "/api",
+      "requiresAuth": true,
+      "authType": "token",
+      "token": "${HOMEASSISTANT_TOKEN}"
+    },
+    "n8n": {
+      "enabled": true,
+      "url": "http://n8n.n8n.svc.cluster.local:5678",
+      "externalUrl": "https://n8n.k3s.dahan.house",
+      "type": "n8n",
+      "description": "n8n workflow automation",
+      "apiPath": "/api/v1",
+      "requiresAuth": true,
+      "authType": "apikey",
+      "apiKey": "${N8N_API_KEY}"
+    },
+    "portainer": {
+      "enabled": true,
+      "url": "http://portainer.portainer.svc.cluster.local:9000",
+      "externalUrl": "https://portainer.k3s.dahan.house",
+      "type": "portainer",
+      "description": "Portainer container management",
+      "apiPath": "/api",
+      "requiresAuth": true,
+      "authType": "jwt",
+      "username": "${PORTAINER_USERNAME}",
+      "password": "${PORTAINER_PASSWORD}"
+    },
+    "nautobot": {
+      "enabled": true,
+      "url": "http://nautobot.nautobot.svc.cluster.local:8080",
+      "externalUrl": "https://nautobot.k3s.dahan.house",
+      "type": "nautobot",
+      "description": "Nautobot IPAM/DCIM",
+      "apiPath": "/api",
+      "requiresAuth": true,
+      "authType": "token",
+      "token": "${NAUTOBOT_API_TOKEN}"
+    },
+    "postgres": {
+      "enabled": true,
+      "url": "postgres.postgres.svc.cluster.local:5432",
+      "type": "postgresql",
+      "description": "PostgreSQL database",
+      "requiresAuth": true,
+      "username": "${POSTGRES_USERNAME}",
+      "password": "${POSTGRES_PASSWORD}",
+      "databases": ["superset", "netbox", "nautobot"]
+    },
+    "traefik": {
+      "enabled": true,
+      "url": "http://traefik.kube-system.svc.cluster.local:9000",
+      "externalUrl": "https://traefik.k3s.dahan.house",
+      "type": "traefik",
+      "description": "Traefik ingress dashboard",
+      "apiPath": "/api",
+      "requiresAuth": false
+    },
+    "rustdesk": {
+      "enabled": true,
+      "url": "http://rustdesk-hbbs.rustdesk.svc.cluster.local:21114",
+      "externalUrl": "http://10.0.200.5:21114",
+      "type": "rustdesk",
+      "description": "RustDesk remote desktop server",
+      "requiresAuth": false
+    }
+  },
+  "configReloadInterval": 300,
+  "healthCheckInterval": 60
+}

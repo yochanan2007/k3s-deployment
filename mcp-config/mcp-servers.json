@@ -1,0 +1,64 @@
+{
+  "mcpServers": {
+    "k3s": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@fangjunjie/ssh-mcp-server",
+        "--host",
+        "10.0.0.210",
+        "--port",
+        "22",
+        "--username",
+        "johnd",
+        "--privateKey",
+        "${SSH_PRIVATE_KEY_PATH}"
+      ]
+    },
+    "docker2": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@fangjunjie/ssh-mcp-server",
+        "--host",
+        "10.0.0.120",
+        "--port",
+        "22",
+        "--username",
+        "root",
+        "--privateKey",
+        "${SSH_PRIVATE_KEY_PATH}"
+      ]
+    },
+    "docker3": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@fangjunjie/ssh-mcp-server",
+        "--host",
+        "10.0.0.121",
+        "--port",
+        "22",
+        "--username",
+        "root",
+        "--privateKey",
+        "${SSH_PRIVATE_KEY_PATH}"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "k3s-cluster": {
+      "type": "http",
+      "url": "https://mcp.k3s.dahan.house/mcp",
+      "description": "MCP proxy for all K3s services"
+    }
+  }
+}
