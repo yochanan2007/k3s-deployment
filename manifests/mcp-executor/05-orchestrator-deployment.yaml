@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-orchestrator
+  namespace: mcp-executor
+  labels:
+    app.kubernetes.io/name: mcp-orchestrator
+    app.kubernetes.io/component: orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-orchestrator
+  template:
+    metadata:
+      labels:
+        app: mcp-orchestrator
+        app.kubernetes.io/name: mcp-orchestrator
+    spec:
+      initContainers:
+      - name: git-sync-init
+        image: alpine/git:latest
+        command:
+          - sh
+          - -c
+          - |
+            echo "Cloning repository..."
+            git clone https://github.com/John-Isr/k3s-deployment.git /config
+            echo "Repository cloned successfully"
+            ls -la /config/mcp-config/executor/
+        volumeMounts:
+        - name: config
+          mountPath: /config
+      containers:
+      - name: orchestrator
+        image: node:22-alpine
+        command:
+          - sh
+          - -c
+          - |
+            cat > /app/orchestrator.js << 'EOF'
+            const { spawn } = require('child_process');
+            const fs = require('fs');
+            const path = require('path');
+
+            const CONFIG_DIR = '/config/mcp-config/executor';
+            const processes = new Map();
+
+            function log(msg) {
+              console.log(`[${new Date().toISOString()}] ${msg}`);
+            }
+
+            function replaceEnvVars(value, env) {
+              if (typeof value !== 'string') return value;
+              return value.replace(/\$\{([^}]+)\}/g, (match, varName) => {
+                return env[varName] || process.env[varName] || match;
+              });
+            }
+
+            function startServer(config) {
+              if (!config.enabled) {
+                log(`${config.name}: Disabled, skipping`);
+                return;
+              }
+
+              const args = config.args.map(arg => replaceEnvVars(arg, config.env || {}));
+
+              log(`${config.name}: Starting on port ${config.port}`);
+              log(`${config.name}: ${config.command} ${args.join(' ')}`);
+
+              const env = { ...process.env };
+              if (config.env) {
+                Object.keys(config.env).forEach(key => {
+                  env[key] = replaceEnvVars(config.env[key], config.env);
+                });
+              }
+
+              const proc = spawn(config.command, args, {
+                env,
+                stdio: ['ignore', 'pipe', 'pipe']
+              });
+
+              proc.stdout.on('data', (data) => {
+                log(`${config.name}: ${data.toString().trim()}`);
+              });
+
+              proc.stderr.on('data', (data) => {
+                log(`${config.name} [ERROR]: ${data.toString().trim()}`);
+              });
+
+              proc.on('exit', (code) => {
+                log(`${config.name}: Exited with code ${code}`);
+                processes.delete(config.name);
+
+                // Restart after 5 seconds
+                if (config.enabled) {
+                  setTimeout(() => {
+                    log(`${config.name}: Restarting...`);
+                    startServer(config);
+                  }, 5000);
+                }
+              });
+
+              processes.set(config.name, proc);
+            }
+
+            function loadConfigs() {
+              log('Loading configurations...');
+
+              if (!fs.existsSync(CONFIG_DIR)) {
+                log(`Config directory not found: ${CONFIG_DIR}`);
+                return;
+              }
+
+              const files = fs.readdirSync(CONFIG_DIR)
+                .filter(f => f.endsWith('.json') && f !== 'README.md');
+
+              log(`Found ${files.length} config files`);
+
+              files.forEach(file => {
+                try {
+                  const configPath = path.join(CONFIG_DIR, file);
+                  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+                  if (!processes.has(config.name)) {
+                    startServer(config);
+                  }
+                } catch (err) {
+                  log(`Error loading ${file}: ${err.message}`);
+                }
+              });
+            }
+
+            function gitPull() {
+              log('Pulling latest configs from git...');
+              const proc = spawn('git', ['pull'], {
+                cwd: '/config',
+                stdio: ['ignore', 'pipe', 'pipe']
+              });
+
+              proc.on('exit', (code) => {
+                if (code === 0) {
+                  log('Git pull successful, reloading configs...');
+                  loadConfigs();
+                } else {
+                  log(`Git pull failed with code ${code}`);
+                }
+              });
+            }
+
+            // Initial load
+            loadConfigs();
+
+            // Reload configs every 5 minutes
+            setInterval(gitPull, 5 * 60 * 1000);
+
+            log('Orchestrator started');
+
+            // Keep alive
+            setInterval(() => {
+              log(`Running servers: ${Array.from(processes.keys()).join(', ') || 'none'}`);
+            }, 60000);
+            EOF
+
+            node /app/orchestrator.js
+        env:
+        - name: NODE_ENV
+          value: production
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+      volumes:
+      - name: config
+        emptyDir: {}

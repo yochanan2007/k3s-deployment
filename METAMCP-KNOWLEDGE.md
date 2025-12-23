@@ -18,13 +18,23 @@ This document provides context for Claude Code to understand the MCP (Model Cont
 │  • Tool filtering & cherry-picking                     │
 │  • Namespace organization                              │
 │  • API key authentication                              │
-└──┬────────────┬────────────┬──────────────────────────┘
-   │            │            │
-   ▼            ▼            ▼
-┌─────────┐ ┌─────────┐ ┌──────────────────┐
-│k3s-proxy│ │  code   │ │  Future servers  │
-│         │ │executor │ │  (add via GitOps)│
-└─────────┘ └─────────┘ └──────────────────┘
+└──┬────────────┬──────────────────────────────────────┘
+   │            │
+   ▼            ▼
+┌─────────┐ ┌───────────────────────────────────────┐
+│k3s-proxy│ │  MCP Executor Namespace               │
+│         │ │  ┌─────────────────────────────────┐  │
+└─────────┘ │  │ Orchestrator (GitOps-managed)   │  │
+            │  │  • Reads configs from GitHub    │  │
+            │  │  • Spawns MCP server processes  │  │
+            │  │  • Auto-reloads every 5 min     │  │
+            │  └──┬──────────────────────────────┘  │
+            │     │                                  │
+            │     ├─► code-executor (port 3000)     │
+            │     ├─► authentik-mcp (port 3001)     │
+            │     ├─► [future servers] (3002+)      │
+            │     └─► Add more via GitHub configs   │
+            └───────────────────────────────────────┘
 ```
 
 ### Core Components
@@ -62,17 +72,24 @@ This document provides context for Claude Code to understand the MCP (Model Cont
 - RustDesk (Remote desktop)
 - Nautobot (Network automation)
 
-#### 3. code-executor (Python Sandbox)
-- **Purpose**: Token-efficient code execution with API access
+#### 3. MCP Executor Orchestrator (GitOps-Managed)
+- **Purpose**: Runs multiple MCP servers in one namespace, managed via GitHub configs
 - **Namespace**: `mcp-executor`
-- **URL**: http://mcp-code-executor.mcp-executor.svc.cluster.local:80/mcp
+- **Service**: http://mcp-orchestrator.mcp-executor.svc.cluster.local
 - **Transport**: SSE
 
-**Key Features**:
+**Architecture**:
+- **Orchestrator Pod**: Spawns and manages multiple MCP server processes
+- **GitOps Sync**: Pulls configs from GitHub every 5 minutes
+- **Config Location**: `mcp-config/executor/*.json`
+- **Auto-Deploy**: Add config to GitHub → auto-deploys within 5 minutes
+
+**Currently Running Servers**:
+
+##### a. code-executor (Port 3000)
 - Python code execution in isolated sandbox
 - Pre-configured Portainer API client
-- Token efficiency: ~200 tokens vs 10,000+ for traditional tools
-- Automatic cleanup after execution
+- Token efficiency: ~200 tokens vs 10,000+
 
 **Available in sandbox**:
 ```python
@@ -83,6 +100,12 @@ containers = pc.list_containers(endpoint_id=1)
 pc.start_container(endpoint_id=1, container_id="...")
 pc.container_logs(endpoint_id=1, container_id="...", tail=100)
 ```
+
+##### b. authentik-mcp (Port 3001)
+- Authentik SSO management
+- Package: `@cdmx/authentik-mcp`
+- Tools: User/group/application CRUD
+- Config: `mcp-config/executor/authentik-mcp.json`
 
 ## Understanding User Prompts
 
@@ -96,7 +119,41 @@ pc.container_logs(endpoint_id=1, container_id="...", tail=100)
 **What This Means**:
 1. User wants to add a new MCP server for that service
 2. The service is likely already running in k3s
-3. Need to create MCP server manifests that expose tools for that service
+3. **All MCP servers run in `mcp-executor` namespace** via the orchestrator
+4. Add via GitOps: create config in `mcp-config/executor/[service]-mcp.json`
+
+**How to Add a New MCP Server (GitOps Workflow)**:
+
+1. **Create config file**: `mcp-config/executor/my-service-mcp.json`
+   ```json
+   {
+     "name": "my-service-mcp",
+     "enabled": true,
+     "description": "Service description",
+     "command": "npx",
+     "args": ["-y", "@package/mcp-server"],
+     "port": 3002
+   }
+   ```
+
+2. **Commit and push to GitHub**:
+   ```bash
+   git add mcp-config/executor/my-service-mcp.json
+   git commit -m "feat: Add my-service MCP server"
+   git push origin main
+   ```
+
+3. **Wait 5 minutes** for auto-deployment (orchestrator pulls from GitHub)
+
+4. **Add to MetaMCP**:
+   - Create: `mcp-config/servers/my-service-mcp.json`
+   - URL: `http://mcp-orchestrator.mcp-executor.svc.cluster.local:[port]`
+   - Run: `./scripts/update-metamcp-servers.sh`
+
+**Port Allocation**:
+- 3000: code-executor (existing)
+- 3001: authentik-mcp
+- 3002+: Available for new servers
 
 **How to Respond**:
 

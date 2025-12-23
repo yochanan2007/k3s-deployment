@@ -1,0 +1,28 @@
+{
+  "name": "authentik-mcp",
+  "enabled": true,
+  "description": "Authentik SSO management - users, groups, applications, flows",
+  "command": "npx",
+  "args": [
+    "-y",
+    "@cdmx/authentik-mcp",
+    "--base-url",
+    "http://authentik-server.authentik.svc.cluster.local:9000/api/v3",
+    "--token",
+    "${AUTHENTIK_TOKEN}"
+  ],
+  "env": {
+    "AUTHENTIK_TOKEN": "WLytVXssB0tw4G87vtmyMG55mWqDuxyoluICIW2XRnejPhuulTLUis3WeL0q"
+  },
+  "port": 3001,
+  "metadata": {
+    "package": "@cdmx/authentik-mcp",
+    "added": "2025-12-23",
+    "tools": [
+      "authentik_list_users",
+      "authentik_create_user",
+      "authentik_list_groups",
+      "authentik_list_applications"
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "authentik-mcp",
+  "type": "SSE",
+  "url": "http://mcp-orchestrator.mcp-executor.svc.cluster.local:3001",
+  "description": "Authentik SSO management - users, groups, applications, flows (via @cdmx/authentik-mcp)",
+  "enabled": true,
+  "metadata": {
+    "service": "mcp-orchestrator",
+    "namespace": "mcp-executor",
+    "port": 3001,
+    "added": "2025-12-23T10:30:00Z",
+    "package": "@cdmx/authentik-mcp",
+    "executor_config": "mcp-config/executor/authentik-mcp.json",
+    "tools": [
+      "authentik_list_users",
+      "authentik_create_user",
+      "authentik_update_user",
+      "authentik_delete_user",
+      "authentik_list_groups",
+      "authentik_create_group",
+      "authentik_update_group",
+      "authentik_delete_group",
+      "authentik_list_applications",
+      "authentik_create_application",
+      "authentik_list_flows",
+      "authentik_query_events"
+    ],
+    "features": [
+      "GitOps-managed (edit config in GitHub)",
+      "Auto-deploys within 5 minutes",
+      "Full CRUD operations",
+      "OAuth 2.1 compliant"
+    ]
+  }
+}
