@@ -1,0 +1,24 @@
+{
+  "name": "k3s-proxy",
+  "type": "SSE",
+  "url": "http://mcp-proxy.mcp-proxy.svc.cluster.local:80/mcp",
+  "description": "K3s cluster services (AdGuard, Authentik, Rancher, Home Assistant, n8n, Traefik, PostgreSQL, etc.)",
+  "enabled": true,
+  "metadata": {
+    "service": "mcp-proxy",
+    "namespace": "mcp-proxy",
+    "port": 80,
+    "added": "2025-12-23T00:00:00Z",
+    "tools": [
+      "adguard_get_status",
+      "authentik_list_users",
+      "rancher_list_clusters",
+      "homeassistant_get_state",
+      "n8n_list_workflows",
+      "traefik_list_routes",
+      "postgres_query",
+      "rustdesk_list_peers",
+      "nautobot_query"
+    ]
+  }
+}

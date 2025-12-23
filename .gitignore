@@ -24,5 +24,14 @@ manifests/traefik/03-dashboard-auth.yaml
 *.bak
 *.backup
 
+# Docker images and build artifacts
+*.tar
+*.tar.gz
+node_modules/
+
+# Test/debug files
+netdiag.txt
+nul
+
 # Claude agent files (local development only)
 .claude/

@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "k3s-metamcp": {
+      "url": "https://metamcp.k3s.dahan.house/metamcp/default/sse",
+      "transport": "sse",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY_HERE"
+      }
+    }
+  },
+  "_comment": "INSTRUCTIONS:",
+  "_step1": "1. Open https://metamcp.k3s.dahan.house in your browser",
+  "_step2": "2. Login and configure servers (k3s-proxy, code-executor)",
+  "_step3": "3. Go to Settings → API Keys → Generate New Key",
+  "_step4": "4. Copy the API key and replace YOUR_API_KEY_HERE above",
+  "_step5": "5. Copy this file to Claude Code settings as .mcp.json",
+  "_step6": "6. Restart Claude Code",
+  "_note": "The endpoint URL may vary based on your namespace configuration in MetaMCP"
+}

@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: metamcp-ingress
+  namespace: metamcp
+  labels:
+    app.kubernetes.io/name: metamcp
+    app.kubernetes.io/component: ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-dns"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    # Disable buffering for SSE (Server-Sent Events)
+    traefik.ingress.kubernetes.io/router.middlewares: metamcp-nobuffer@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - metamcp.k3s.dahan.house
+      secretName: metamcp-tls
+  rules:
+    - host: metamcp.k3s.dahan.house
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: metamcp
+                port:
+                  number: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nobuffer
+  namespace: metamcp
+  labels:
+    app.kubernetes.io/name: metamcp
+    app.kubernetes.io/component: middleware
+spec:
+  buffering:
+    maxRequestBodyBytes: 0
+    memRequestBodyBytes: 0
+    maxResponseBodyBytes: 0
+    memResponseBodyBytes: 0
+    retryExpression: ""

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: metamcp
+  namespace: metamcp
+  labels:
+    app.kubernetes.io/name: metamcp
+    app.kubernetes.io/component: server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: metamcp
+    app.kubernetes.io/component: server
