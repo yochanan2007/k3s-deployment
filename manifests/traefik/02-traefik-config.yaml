@@ -72,6 +72,23 @@ spec:
       operator: "Exists"
       effect: "NoSchedule"
 
+    # TCP Entrypoints for RustDesk
+    ports:
+      web:
+        port: 80
+        protocol: TCP
+      websecure:
+        port: 443
+        protocol: TCP
+      rustdesk-hbbs:
+        port: 21118
+        protocol: TCP
+        expose: true
+      rustdesk-hbbr:
+        port: 21119
+        protocol: TCP
+        expose: true
+
     service:
       ipFamilyPolicy: "PreferDualStack"
       # IP will be auto-assigned from MetalLB pool (10.0.200.1-250)
