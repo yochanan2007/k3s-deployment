@@ -83,11 +83,9 @@ spec:
       rustdesk-hbbs:
         port: 21118
         protocol: TCP
-        expose: true
       rustdesk-hbbr:
         port: 21119
         protocol: TCP
-        expose: true
 
     service:
       ipFamilyPolicy: "PreferDualStack"
