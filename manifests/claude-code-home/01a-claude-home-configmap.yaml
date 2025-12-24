@@ -1,0 +1,233 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: claude-home-init
+  namespace: claude-code-home
+data:
+  docker-entrypoint.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "=== Claude Code Home Initialization ==="
+
+    # Update package lists
+    apt-get update
+
+    # Install basic tools
+    echo "Installing basic tools..."
+    apt-get install -y \
+      openssh-server \
+      sudo \
+      curl \
+      wget \
+      git \
+      vim \
+      nano \
+      htop \
+      net-tools \
+      iputils-ping \
+      dnsutils \
+      build-essential \
+      ca-certificates \
+      gnupg \
+      lsb-release \
+      software-properties-common
+
+    # Install Python 3 and pip
+    echo "Installing Python 3 and pip..."
+    apt-get install -y \
+      python3 \
+      python3-pip \
+      python3-venv \
+      python3-dev
+
+    # Create symlinks for python/pip
+    ln -sf /usr/bin/python3 /usr/bin/python || true
+    ln -sf /usr/bin/pip3 /usr/bin/pip || true
+
+    # Install Node.js (for various dev tools)
+    echo "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+
+    # Install Docker CLI (for managing containers)
+    echo "Installing Docker CLI..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt-get update
+    apt-get install -y docker-ce-cli
+
+    # Install kubectl
+    echo "Installing kubectl..."
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    rm kubectl
+
+    # Install additional development tools
+    echo "Installing additional dev tools..."
+    apt-get install -y \
+      jq \
+      yq \
+      tmux \
+      screen \
+      tree \
+      ncdu \
+      rsync \
+      zip \
+      unzip \
+      bzip2 \
+      xz-utils
+
+    # Install claude-code CLI (if available via npm)
+    echo "Attempting to install claude-code CLI..."
+    npm install -g @anthropic-ai/claude-code || echo "claude-code CLI not available via npm, skipping..."
+
+    # Create claude user
+    echo "Creating user 'claude'..."
+    if ! id -u claude > /dev/null 2>&1; then
+      groupadd -g ${CLAUDE_GID} claude
+      useradd -m -u ${CLAUDE_UID} -g ${CLAUDE_GID} -s /bin/bash claude
+      echo "claude:claude123" | chpasswd
+      usermod -aG sudo claude
+      echo "claude ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    fi
+
+    # Set up workspace permissions
+    chown -R claude:claude /home/claude/workspace
+
+    # Configure SSH
+    echo "Configuring SSH server..."
+    mkdir -p /var/run/sshd
+    mkdir -p /home/claude/.ssh
+    chown claude:claude /home/claude/.ssh
+    chmod 700 /home/claude/.ssh
+
+    # SSH configuration
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+    echo "AllowUsers claude" >> /etc/ssh/sshd_config
+
+    # Set up user environment
+    cat > /home/claude/.bashrc << 'EOF'
+    # .bashrc for claude user
+
+    # If not running interactively, don't do anything
+    case $- in
+        *i*) ;;
+          *) return;;
+    esac
+
+    # History configuration
+    HISTCONTROL=ignoreboth
+    HISTSIZE=10000
+    HISTFILESIZE=20000
+    shopt -s histappend
+
+    # Update window size after each command
+    shopt -s checkwinsize
+
+    # Colorful prompt
+    PS1='\[\033[01;32m\]\u@claude-code-home\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+    # Aliases
+    alias ll='ls -alF'
+    alias la='ls -A'
+    alias l='ls -CF'
+    alias k='kubectl'
+    alias kgp='kubectl get pods'
+    alias kgs='kubectl get svc'
+    alias kgn='kubectl get nodes'
+
+    # Environment variables
+    export EDITOR=vim
+    export PATH="$HOME/.local/bin:$PATH"
+
+    # Welcome message
+    echo "==================================="
+    echo "  Claude Code Development Home"
+    echo "==================================="
+    echo "Workspace: /home/claude/workspace"
+    echo "Tools: python, node, docker, kubectl"
+    echo "==================================="
+    EOF
+
+    chown claude:claude /home/claude/.bashrc
+
+    # Create a simple web interface (optional)
+    cat > /home/claude/webserver.py << 'EOF'
+    #!/usr/bin/env python3
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    import subprocess
+    import json
+
+    class InfoHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            html = """
+            <html>
+            <head>
+                <title>Claude Code Home</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                    .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #333; }
+                    .status { background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                    .info { margin: 10px 0; }
+                    pre { background: #263238; color: #aed581; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Claude Code Development Home</h1>
+                    <div class="status">
+                        <h2>System Status: Running</h2>
+                        <div class="info">SSH Access: Port 22 via LoadBalancer IP</div>
+                        <div class="info">User: claude</div>
+                        <div class="info">Workspace: /home/claude/workspace</div>
+                    </div>
+                    <h2>Installed Tools</h2>
+                    <pre>
+    Python:  {python_version}
+    Node:    {node_version}
+    Docker:  {docker_version}
+    Kubectl: {kubectl_version}
+    Git:     {git_version}
+                    </pre>
+                </div>
+            </body>
+            </html>
+            """.format(
+                python_version=subprocess.getoutput('python3 --version'),
+                node_version=subprocess.getoutput('node --version'),
+                docker_version=subprocess.getoutput('docker --version'),
+                kubectl_version=subprocess.getoutput('kubectl version --client --short 2>/dev/null || echo "Installed"'),
+                git_version=subprocess.getoutput('git --version')
+            )
+
+            self.wfile.write(html.encode())
+
+    if __name__ == '__main__':
+        server = HTTPServer(('0.0.0.0', 8080), InfoHandler)
+        print('Web server running on port 8080...')
+        server.serve_forever()
+    EOF
+
+    chmod +x /home/claude/webserver.py
+    chown claude:claude /home/claude/webserver.py
+
+    # Start web server in background
+    su - claude -c "nohup python3 /home/claude/webserver.py > /tmp/webserver.log 2>&1 &"
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    echo "=== Initialization Complete ==="
+    echo "Starting SSH server..."
+
+    # Start SSH server
+    /usr/sbin/sshd -D

@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: claude-code-home
+  namespace: claude-code-home
+  labels:
+    app.kubernetes.io/name: claude-code-home
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`claude.k3s.dahan.house`)
+    kind: Rule
+    services:
+    - name: claude-code-home
+      port: 8080
+  tls:
+    secretName: k3s-dahan-house-tls
