@@ -44,6 +44,20 @@ spec:
         - name: CLAUDE_GID
           value: "1000"
         command: ["/bin/bash", "/docker-entrypoint.sh"]
+        readinessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        livenessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
         securityContext:
           runAsNonRoot: false
           allowPrivilegeEscalation: true

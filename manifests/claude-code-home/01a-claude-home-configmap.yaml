@@ -10,6 +10,19 @@ data:
 
     echo "=== Claude Code Home Initialization ==="
 
+    # Check if initialization has already been done
+    INIT_MARKER="/home/claude/workspace/.initialized"
+    if [ -f "$INIT_MARKER" ]; then
+      echo "Initialization already completed, skipping..."
+      # Just start SSH
+      mkdir -p /var/run/sshd
+      echo "Starting SSH server..."
+      /usr/sbin/sshd -D
+      exit 0
+    fi
+
+    echo "First run detected, installing packages..."
+
     # Update package lists
     apt-get update
 
@@ -225,6 +238,10 @@ data:
     # Clean up
     apt-get clean
     rm -rf /var/lib/apt/lists/*
+
+    # Create marker file to prevent re-initialization
+    echo "$(date): Initialization completed" > "$INIT_MARKER"
+    chown claude:claude "$INIT_MARKER"
 
     echo "=== Initialization Complete ==="
     echo "Starting SSH server..."
