@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustdesk-webclient
+  namespace: rustdesk
+  labels:
+    app: rustdesk-webclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rustdesk-webclient
+  template:
+    metadata:
+      labels:
+        app: rustdesk-webclient
+    spec:
+      containers:
+        - name: webclient
+          image: keyurbhole/flutter_web_desk:latest
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          env:
+            - name: RUSTDESK_SERVER
+              value: "rustdesk.k3s.dahan.house"
