@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: vaultwarden
     app.kubernetes.io/instance: vaultwarden
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 10.0.200.14
+    metallb.universe.tf/loadBalancerIPs: 10.0.200.15
 spec:
   type: LoadBalancer
   ports:
