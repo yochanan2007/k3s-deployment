@@ -25,6 +25,79 @@ This is a **k3s deployment repository** containing Kubernetes manifests for a pr
 - dahan.house → Primary domain
 - *.k3s.dahan.house → Wildcard cert for services
 
+## Deployment Workflow
+
+**CRITICAL: All cluster changes MUST follow this GitOps workflow:**
+
+### GitOps Architecture
+- **Fleet GitOps** (Rancher) watches the `main` branch of this repository
+- Any changes merged to `main` are **automatically deployed** to the k3s cluster
+- NEVER apply changes directly via `kubectl` - always use Git
+
+### Standard Workflow
+
+1. **Update Manifests Locally**
+   - ALWAYS modify manifest files in `manifests/` directory first
+   - NEVER apply changes directly to cluster via kubectl
+   - Validate YAML syntax before committing
+
+2. **Commit to claude-edits Branch**
+   - Commit all changes to `claude-edits` branch
+   - Use descriptive commit messages following conventional commits format:
+     - `feat:` for new features
+     - `fix:` for bug fixes
+     - `docs:` for documentation changes
+     - `refactor:` for refactoring
+   - Include all related manifest files in the commit
+
+3. **Push to GitHub**
+   - Push `claude-edits` branch to GitHub
+   - Changes will be reviewed before merging
+
+4. **Merge to Main (Triggers Deployment)**
+   - **DEFAULT**: Do NOT merge to main automatically
+   - **ONLY** merge to main when user explicitly approves
+   - User will review changes in `claude-edits` branch first
+   - **Upon merge to main**: Fleet GitOps automatically deploys to cluster
+
+**Git Commands:**
+```bash
+# Stage changes
+git add manifests/
+
+# Commit with conventional commit message
+git commit -m "feat: Add RustDesk web client and ingress configuration"
+
+# Push to claude-edits branch
+git push origin claude-edits
+
+# Merge to main (ONLY when user approves) - triggers Fleet deployment
+git checkout main
+git merge claude-edits
+git push origin main
+```
+
+**Exception:** User may explicitly say "this time you can merge to main" - only then proceed with merge.
+
+### Fleet GitOps Behavior
+- **Watches**: `main` branch
+- **Auto-sync**: Enabled (changes deployed automatically)
+- **Reconciliation**: Fleet continuously monitors and applies changes
+- **Rollback**: Git revert commits will automatically roll back deployments
+
+### Verification After Deployment
+After merging to main, Fleet will deploy changes within ~1-2 minutes. Verify with:
+```bash
+# Check Fleet bundle status
+kubectl get bundles -A
+
+# Check application status
+kubectl get pods -n <namespace>
+
+# Check specific resources
+kubectl get all -n <namespace>
+```
+
 ## Working with the Cluster
 
 ### Remote Access via MCP
@@ -179,4 +252,3 @@ kubectl apply -f manifests/adguard/
 4. **Rancher Not Included**: Rancher manifests are not in this repository. Only AdGuard, Traefik, and cert-manager configs are tracked.
 
 5. **Domain Dependencies**: All domains (dahan.house, *.k3s.dahan.house) must resolve to correct MetalLB IPs for ingress to work.
-push edit only to claude-edits branch, the merge to main done manully unless i specific told you otherwise

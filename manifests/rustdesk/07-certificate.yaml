@@ -1,0 +1,14 @@
+# Optional: Use this certificate if cross-namespace secret access fails
+# If using this, update 06-ingressroute.yaml to use secretName: rustdesk-tls
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rustdesk-tls
+  namespace: rustdesk
+spec:
+  secretName: rustdesk-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - rustdesk.k3s.dahan.house

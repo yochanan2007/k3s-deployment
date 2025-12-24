@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: rustdesk
+  namespace: rustdesk
+  labels:
+    app: rustdesk
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Web client UI - main application
+    - kind: Rule
+      match: Host(`rustdesk.k3s.dahan.house`) && PathPrefix(`/`)
+      priority: 1
+      services:
+        - name: rustdesk-webclient
+          port: 8000
+    # WebSocket endpoint for RustDesk connections
+    - kind: Rule
+      match: Host(`rustdesk.k3s.dahan.house`) && PathPrefix(`/ws`)
+      priority: 10
+      services:
+        - name: rustdesk-lb
+          port: 21118
+  tls:
+    secretName: k3s-dahan-house-tls
