@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pangolin-config
+  namespace: pangolin
+data:
+  config.yml: |
+    app:
+      dashboard_url: "https://pangolin.k3s.dahan.house"
+
+    domains:
+      k3s:
+        base_domain: "pangolin.k3s.dahan.house"
+        cert_resolver: "letsencrypt"
+
+    server:
+      secret: "change-this-to-a-secure-random-string-for-production"
+      external_port: 80
+      internal_port: 5050
+      nextjs_port: 3000
+
+    gerbil:
+      base_endpoint: "pangolin.k3s.dahan.house"
+      port_range_start: 21821
+      port_range_end: 21920
+
+    flags:
+      require_email_verification: false
+      disable_signup_without_invite: false
+      disable_user_create_org: false
+
+    organizations:
+      default_network_cidr: "10.20.0.0/16"
+      default_subnet_size: 24
+---

@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pangolin-ingress
+  namespace: pangolin
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - pangolin.k3s.dahan.house
+    secretName: pangolin-tls
+  rules:
+    - host: pangolin.k3s.dahan.house
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pangolin
+                port:
+                  number: 80
+---
