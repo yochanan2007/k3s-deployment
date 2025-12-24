@@ -48,7 +48,7 @@ RustDesk is an open-source remote desktop software, an alternative to TeamViewer
 
 | Port  | Protocol | Service | Purpose                          | Access Method |
 |-------|----------|---------|----------------------------------|---------------|
-| 8000  | TCP      | webclient | Web client UI                 | Ingress (HTTPS) |
+| 5000  | TCP      | webclient | Web client UI                 | Ingress (HTTPS) |
 | 21115 | TCP      | hbbs    | NAT type test                    | LoadBalancer |
 | 21116 | TCP/UDP  | hbbs    | ID registration & heartbeat      | LoadBalancer |
 | 21117 | TCP      | hbbr    | Relay server                     | LoadBalancer |
@@ -150,7 +150,7 @@ Simply navigate to: https://rustdesk.k3s.dahan.house
 
 Ensure DNS record exists:
 ```
-rustdesk.k3s.dahan.house  →  10.0.0.241 (Traefik LoadBalancer IP)
+rustdesk.k3s.dahan.house  →  10.0.200.2 (Traefik LoadBalancer IP)
 ```
 
 Add to Cloudflare DNS or local DNS server.

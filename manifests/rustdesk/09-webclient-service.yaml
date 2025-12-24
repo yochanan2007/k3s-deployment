@@ -11,6 +11,6 @@ spec:
     app: rustdesk-webclient
   ports:
     - name: http
-      port: 8000
-      targetPort: 8000
+      port: 5000
+      targetPort: 5000
       protocol: TCP

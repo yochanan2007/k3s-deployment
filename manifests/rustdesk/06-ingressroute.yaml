@@ -15,7 +15,7 @@ spec:
       priority: 1
       services:
         - name: rustdesk-webclient
-          port: 8000
+          port: 5000
     # WebSocket endpoint for RustDesk connections
     - kind: Rule
       match: Host(`rustdesk.k3s.dahan.house`) && PathPrefix(`/ws`)
