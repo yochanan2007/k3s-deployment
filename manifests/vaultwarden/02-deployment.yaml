@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  labels:
+    app.kubernetes.io/name: vaultwarden
+    app.kubernetes.io/instance: vaultwarden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vaultwarden
+      app.kubernetes.io/instance: vaultwarden
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vaultwarden
+        app.kubernetes.io/instance: vaultwarden
+    spec:
+      containers:
+        - name: vaultwarden
+          image: vaultwarden/server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: ROCKET_PORT
+              value: "80"
+            - name: WEBSOCKET_ENABLED
+              value: "true"
+            - name: DOMAIN
+              value: "https://vault.k3s.dahan.house" # Important for Vaultwarden's internal configuration
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /admin
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /admin
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultwarden-data

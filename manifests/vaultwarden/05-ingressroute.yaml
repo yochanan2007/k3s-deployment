@@ -1,0 +1,23 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden-ingressroute
+  namespace: vaultwarden
+spec:
+  entrypoints:
+    - websecure
+  routes:
+    - match: Host(`vault.k3s.dahan.house`)
+      kind: Rule
+      services:
+        - name: vaultwarden-clusterip
+          port: 80
+    - match: Host(`vault.k3s.dahan.house`) && PathPrefix(`/notifications/hub`)
+      kind: Rule
+      services:
+        - name: vaultwarden-clusterip
+          port: 80
+      # This router is specifically for websockets, ensuring they are handled correctly.
+      # Traefik automatically upgrades connection to websocket if the backend supports it.
+  tls:
+    secretName: vaultwarden-tls-secret
