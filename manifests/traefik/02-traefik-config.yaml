@@ -82,9 +82,11 @@ spec:
         protocol: TCP
       rustdesk-hbbs:
         port: 21118
+        exposedPort: 21118
         protocol: TCP
       rustdesk-hbbr:
         port: 21119
+        exposedPort: 21119
         protocol: TCP
 
     service:
