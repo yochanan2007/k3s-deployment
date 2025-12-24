@@ -17,10 +17,12 @@ RustDesk is an open-source remote desktop software, an alternative to TeamViewer
 - `02-hbbs-deployment.yaml` - hbbs deployment
 - `03-hbbr-deployment.yaml` - hbbr relay deployment
 - `04-service.yaml` - LoadBalancer services for direct protocol access
-- `06-ingressroute.yaml` - Traefik IngressRoute for HTTPS access (web client + WebSocket)
+- `06-ingressroute.yaml` - Traefik IngressRoute for HTTPS access (web client)
 - `07-certificate.yaml` - (Optional) Namespace-specific TLS certificate
 - `08-webclient-deployment.yaml` - RustDesk web client deployment
 - `09-webclient-service.yaml` - ClusterIP service for web client
+- `10-tcp-hbbs-ingressroute.yaml` - TCP IngressRoute for hbbs WebSocket (port 21118)
+- `11-tcp-hbbr-ingressroute.yaml` - TCP IngressRoute for hbbr relay (port 21119)
 
 ## Access Methods
 
@@ -148,12 +150,34 @@ Simply navigate to: https://rustdesk.k3s.dahan.house
 
 ## DNS Configuration
 
-Ensure DNS record exists:
+Ensure DNS records exist for all RustDesk services:
+
 ```
-rustdesk.k3s.dahan.house  →  10.0.200.2 (Traefik LoadBalancer IP)
+# Web Client (HTTPS)
+rustdesk.k3s.dahan.house         →  10.0.200.2 (Traefik LoadBalancer IP)
+
+# TCP Services via Traefik (use DNS names instead of IPs)
+hbbs.k3s.dahan.house             →  10.0.200.2 (Traefik LoadBalancer IP)
+hbbr.k3s.dahan.house             →  10.0.200.2 (Traefik LoadBalancer IP)
+
+# Or use wildcard DNS:
+*.k3s.dahan.house                →  10.0.200.2 (Traefik LoadBalancer IP)
 ```
 
 Add to Cloudflare DNS or local DNS server.
+
+### Access Methods
+
+**Via DNS Names (Recommended for Internet Access):**
+- Web Client: `https://rustdesk.k3s.dahan.house`
+- hbbs WebSocket: `hbbs.k3s.dahan.house:21118` (TCP via Traefik)
+- hbbr Relay: `hbbr.k3s.dahan.house:21119` (TCP via Traefik)
+
+**Via LoadBalancer IPs (Direct Access):**
+- hbbs: `10.0.200.5:21116` (ID registration)
+- hbbr: `10.0.200.6:21117` (Relay server)
+
+Both methods work - use DNS names for convenience and internet access.
 
 ## Security Notes
 
