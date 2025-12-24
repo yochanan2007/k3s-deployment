@@ -17,11 +17,17 @@ spec:
     spec:
       containers:
         - name: webclient
-          image: keyurbhole/flutter_web_desk:latest
+          image: pmietlicki/rustdesk-web-client:v1
           ports:
-            - containerPort: 8000
+            - containerPort: 5000
               name: http
               protocol: TCP
           env:
-            - name: RUSTDESK_SERVER
-              value: "rustdesk.k3s.dahan.house"
+            - name: CUSTOM_RENDEZVOUS_SERVER
+              value: "rustdesk-lb.rustdesk.svc.cluster.local:21116"
+            - name: RELAY_SERVER
+              value: "rustdesk-relay-lb.rustdesk.svc.cluster.local:21117"
+            - name: API_SERVER
+              value: ""
+            - name: KEY
+              value: "yR6HOZJGhLWoUWd8TvOClwOFOqW6sCpzTAOr41Kj74c="

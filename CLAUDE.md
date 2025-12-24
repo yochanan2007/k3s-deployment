@@ -20,8 +20,8 @@ This is a **k3s deployment repository** containing Kubernetes manifests for a pr
 - **Traefik Dashboard** (traefik.k3s.dahan.house): Ingress management UI
 
 **Network Topology:**
-- 10.0.0.240 → AdGuard Home (HTTP:80, DNS:53 TCP/UDP)
-- 10.0.0.241 → Traefik (HTTP:80, HTTPS:443)
+- 10.0.200.1 → AdGuard Home (HTTP:80, DNS:53 TCP/UDP)
+- 10.0.200.2 → Traefik (HTTP:80, HTTPS:443)
 - dahan.house → Primary domain
 - *.k3s.dahan.house → Wildcard cert for services
 
