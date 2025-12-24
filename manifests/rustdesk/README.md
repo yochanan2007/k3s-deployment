@@ -17,6 +17,7 @@ RustDesk is an open-source remote desktop software, an alternative to TeamViewer
 - `02-hbbs-deployment.yaml` - hbbs deployment
 - `03-hbbr-deployment.yaml` - hbbr relay deployment
 - `04-service.yaml` - LoadBalancer services for direct protocol access
+- `05-clusterip-services.yaml` - ClusterIP services for internal cluster communication
 - `06-ingressroute.yaml` - Traefik IngressRoute for HTTPS access (web client)
 - `07-certificate.yaml` - (Optional) Namespace-specific TLS certificate
 - `08-webclient-deployment.yaml` - RustDesk web client deployment
