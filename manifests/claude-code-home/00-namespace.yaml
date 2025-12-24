@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: claude-code-home
+  labels:
+    name: claude-code-home
+    app: claude-code-home
