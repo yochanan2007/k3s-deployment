@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: claude
+  namespace: claude
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-dns"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - claude.k3s.dahan.house
+    secretName: claude-tls
+  rules:
+  - host: claude.k3s.dahan.house
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: claude-http
+            port:
+              number: 4200
