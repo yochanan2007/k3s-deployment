@@ -24,9 +24,9 @@ spec:
           env:
             # Point dashboard to our self-hosted management API
             - name: NETBIRD_MGMT_API_ENDPOINT
-              value: "https://netbird-api.k3s.dahan.house"
+              value: "http://netbird-management.netbird.svc.cluster.local:33073"
             - name: NETBIRD_MGMT_GRPC_API_ENDPOINT
-              value: "https://netbird-api.k3s.dahan.house"
+              value: "http://netbird-management.netbird.svc.cluster.local:33073"
             # Authentik OIDC configuration (correct env var names for dashboard)
             - name: AUTH_AUTHORITY
               value: "https://auth.k3s.dahan.house/application/o/netbird/"
