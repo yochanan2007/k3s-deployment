@@ -63,8 +63,7 @@ spec:
           value: "America/New_York"
         command: ["/bin/bash", "/scripts/start-services.sh"]
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
