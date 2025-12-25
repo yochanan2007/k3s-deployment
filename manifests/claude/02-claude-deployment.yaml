@@ -18,7 +18,7 @@ spec:
       containers:
       - name: claude
         image: ghcr.io/dahanhouse/claude-dev:latest
-        imagePullPolicy: Always
+        imagePullPolicy: Never
         ports:
         - name: ssh
           containerPort: 22
