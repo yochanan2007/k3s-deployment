@@ -1,0 +1,210 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-config
+  namespace: homer
+data:
+  config.yml: |
+    ---
+    # Homepage configuration
+    # See https://github.com/bastienwirtz/homer/blob/main/docs/configuration.md for documentation.
+
+    title: "K3s Dashboard"
+    subtitle: "Cluster Services"
+    logo: "logo.png"
+    # icon: "fas fa-skull-crossbones" # Optional icon
+
+    header: true
+    footer: '<p>Created with <span class="has-text-danger">❤️</span> with <a href="https://bulma.io/">bulma</a>, <a href="https://vuejs.org/">vuejs</a> & <a href="https://fontawesome.com/">font awesome</a> // Fork me on <a href="https://github.com/bastienwirtz/homer"><i class="fab fa-github-alt"></i></a></p>' # set false if you want to hide it.
+
+    # Optional theme customization
+    theme: default
+    colors:
+      light:
+        highlight-primary: "#3367d6"
+        highlight-secondary: "#4285f4"
+        highlight-hover: "#5a95f5"
+        background: "#f5f5f5"
+        card-background: "#ffffff"
+        text: "#363636"
+        text-header: "#ffffff"
+        text-title: "#303030"
+        text-subtitle: "#424242"
+        card-shadow: rgba(0, 0, 0, 0.1)
+        link: "#3273dc"
+        link-hover: "#363636"
+      dark:
+        highlight-primary: "#3367d6"
+        highlight-secondary: "#4285f4"
+        highlight-hover: "#5a95f5"
+        background: "#131313"
+        card-background: "#2b2b2b"
+        text: "#eaeaea"
+        text-header: "#ffffff"
+        text-title: "#fafafa"
+        text-subtitle: "#f5f5f5"
+        card-shadow: rgba(0, 0, 0, 0.4)
+        link: "#3273dc"
+        link-hover: "#ffdd57"
+
+    # Optional message
+    message:
+      style: "is-dark" # See https://bulma.io/documentation/components/message/#colors for styling options.
+      title: "Welcome!"
+      icon: "fa fa-grin"
+      content: "This is your k3s cluster dashboard. <br /> Find all services deployed on <b>10.0.0.210</b>"
+
+    # Optional navbar
+    links: [] # Allows for navbar (dark mode, search) without any links
+
+    # Services
+    # First level array represent a group.
+    # Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+    services:
+      - name: "Infrastructure & Management"
+        icon: "fas fa-server"
+        items:
+          - name: "Traefik Dashboard"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/traefik.png"
+            subtitle: "Ingress Controller"
+            tag: "ingress"
+            url: "https://traefik.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Rancher"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/rancher.png"
+            subtitle: "Kubernetes Management"
+            tag: "k8s"
+            url: "https://rancher.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Portainer"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/portainer.png"
+            subtitle: "Container Management"
+            tag: "containers"
+            url: "https://portainer.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Homer"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/homer.png"
+            subtitle: "This Dashboard"
+            tag: "dashboard"
+            url: "https://homer.k3s.dahan.house"
+            target: "_blank"
+
+      - name: "Authentication & Security"
+        icon: "fas fa-shield-alt"
+        items:
+          - name: "Authentik"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/authentik.png"
+            subtitle: "Identity Provider & SSO"
+            tag: "auth"
+            url: "https://auth.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Vaultwarden"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/vaultwarden.png"
+            subtitle: "Password Manager"
+            tag: "security"
+            url: "https://vault.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "AdGuard Home"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/adguard-home.png"
+            subtitle: "DNS & Ad Blocking"
+            tag: "dns"
+            url: "https://adguard.k3s.dahan.house"
+            target: "_blank"
+
+      - name: "Networking & VPN"
+        icon: "fas fa-network-wired"
+        items:
+          - name: "NetBird"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/netbird.png"
+            subtitle: "VPN Dashboard"
+            tag: "vpn"
+            url: "https://netbird.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "NetBird Management API"
+            subtitle: "NetBird API"
+            tag: "api"
+            url: "https://netbird-api.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "NetBird Signal Server"
+            subtitle: "NetBird Signaling"
+            tag: "vpn"
+            url: "https://netbird-signal.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Pangolin"
+            subtitle: "NetBird Web UI"
+            tag: "vpn"
+            url: "https://pangolin.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "RustDesk"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/rustdesk.png"
+            subtitle: "Remote Desktop"
+            tag: "remote"
+            url: "https://rustdesk.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "NetBox"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/netbox.png"
+            subtitle: "IPAM & DCIM"
+            tag: "network"
+            url: "https://netbox.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Nautobot"
+            subtitle: "Network Automation"
+            tag: "network"
+            url: "https://nautobot.k3s.dahan.house"
+            target: "_blank"
+
+      - name: "Automation & Development"
+        icon: "fas fa-code"
+        items:
+          - name: "n8n"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/n8n.png"
+            subtitle: "Workflow Automation"
+            tag: "automation"
+            url: "https://n8n.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "MCP Proxy"
+            subtitle: "Model Context Protocol"
+            tag: "ai"
+            url: "https://mcp.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "MetaMCP"
+            subtitle: "MCP Orchestration"
+            tag: "ai"
+            url: "https://metamcp.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "MCP Code Executor"
+            subtitle: "Code Execution Service"
+            tag: "ai"
+            url: "https://mcp-executor.k3s.dahan.house"
+            target: "_blank"
+
+          - name: "Claude Code Home"
+            subtitle: "Development Environment"
+            tag: "dev"
+            url: "https://claude.k3s.dahan.house"
+            target: "_blank"
+
+      - name: "Home & IoT"
+        icon: "fas fa-home"
+        items:
+          - name: "Home Assistant"
+            logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/home-assistant.png"
+            subtitle: "Home Automation"
+            tag: "iot"
+            url: "https://home.k3s.dahan.house"
+            target: "_blank"
+---
