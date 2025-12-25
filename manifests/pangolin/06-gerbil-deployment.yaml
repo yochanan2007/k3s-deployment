@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gerbil
+  namespace: pangolin
+  labels:
+    app: gerbil
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gerbil
+  template:
+    metadata:
+      labels:
+        app: gerbil
+    spec:
+      containers:
+      - name: gerbil
+        image: fosrl/gerbil:latest
+        imagePullPolicy: Always
+        args:
+          - --reachableAt=http://gerbil:3004
+          - --generateAndSaveKeyTo=/var/config/key
+          - --remoteConfig=http://10.0.200.244/api/v1/
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+          name: wireguard
+        - containerPort: 21820
+          protocol: UDP
+          name: wg-alt
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        - containerPort: 443
+          protocol: TCP
+          name: https
+        - containerPort: 3004
+          protocol: TCP
+          name: api
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+              - SYS_MODULE
+        volumeMounts:
+        - name: gerbil-config
+          mountPath: /var/config
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: gerbil-config
+        persistentVolumeClaim:
+          claimName: gerbil-config
