@@ -173,7 +173,7 @@ data:
 
     # Environment variables
     export EDITOR=vim
-    export PATH="$HOME/.local/bin:$PATH"
+    export PATH="/opt/tools:$HOME/.local/bin:$PATH"
 
     # Welcome message
     echo "==================================="
@@ -193,7 +193,7 @@ data:
 
     # Start ttyd web terminal
     echo "Starting ttyd web terminal on port 8080..."
-    exec /usr/local/bin/ttyd \
+    exec /opt/tools/ttyd \
       --port 8080 \
       --interface 0.0.0.0 \
       --credential claude:claude123 \
