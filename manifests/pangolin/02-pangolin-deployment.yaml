@@ -36,6 +36,9 @@ spec:
             - name: https
               containerPort: 443
               protocol: TCP
+            - name: web
+              containerPort: 3002
+              protocol: TCP
           env:
             - name: TZ
               value: "America/New_York"

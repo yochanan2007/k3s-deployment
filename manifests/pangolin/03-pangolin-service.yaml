@@ -16,4 +16,8 @@ spec:
       port: 443
       targetPort: 443
       protocol: TCP
+    - name: web
+      port: 3002
+      targetPort: 3002
+      protocol: TCP
 ---

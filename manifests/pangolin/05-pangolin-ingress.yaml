@@ -22,5 +22,5 @@ spec:
               service:
                 name: pangolin
                 port:
-                  number: 80
+                  number: 3002
 ---
