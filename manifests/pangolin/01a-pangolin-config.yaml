@@ -16,7 +16,7 @@ data:
     server:
       secret: "change-this-to-a-secure-random-string-for-production"
       external_port: 80
-      internal_port: 80
+      internal_port: 5050
       nextjs_port: 3000
 
     gerbil:

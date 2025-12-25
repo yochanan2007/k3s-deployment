@@ -39,6 +39,9 @@ spec:
             - name: web
               containerPort: 3002
               protocol: TCP
+            - name: api
+              containerPort: 5050
+              protocol: TCP
           env:
             - name: TZ
               value: "America/New_York"
