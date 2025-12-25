@@ -56,6 +56,10 @@ spec:
           volumeMounts:
             - name: management-data
               mountPath: /var/lib/netbird
+            - name: management-config
+              mountPath: /etc/netbird/management.json
+              subPath: management.json
+              readOnly: true
           resources:
             requests:
               memory: "256Mi"
@@ -77,4 +81,7 @@ spec:
         - name: management-data
           persistentVolumeClaim:
             claimName: netbird-management-data
+        - name: management-config
+          configMap:
+            name: netbird-management-config
 ---

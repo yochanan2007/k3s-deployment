@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netbird-management-config
+  namespace: netbird
+data:
+  management.json: |
+    {
+      "Stuns": [
+        {
+          "Proto": "udp",
+          "URI": "stun:10.0.200.17:3478",
+          "Username": "",
+          "Password": null
+        }
+      ],
+      "TURNConfig": {
+        "Turns": [
+          {
+            "Proto": "udp",
+            "URI": "turn:10.0.200.17:3478",
+            "Username": "netbird",
+            "Password": "netbird123"
+          }
+        ],
+        "CredentialsTTL": "12h",
+        "Secret": "netbird-secret-change-me",
+        "TimeBasedCredentials": false
+      },
+      "Signal": {
+        "Proto": "https",
+        "URI": "netbird-signal.k3s.dahan.house:443",
+        "Username": "",
+        "Password": null
+      },
+      "ReverseProxy": {
+        "TrustedHTTPProxies": [],
+        "TrustedHTTPProxiesCount": 0,
+        "TrustedPeers": ["0.0.0.0/0"]
+      },
+      "Datadir": "/var/lib/netbird",
+      "DataStoreEncryptionKey": "",
+      "StoreConfig": {
+        "Engine": "sqlite"
+      },
+      "HttpConfig": {
+        "Address": "0.0.0.0:80",
+        "AuthIssuer": "",
+        "AuthAudience": "",
+        "AuthKeysLocation": "",
+        "AuthUserIDClaim": "",
+        "CertFile": "",
+        "CertKey": "",
+        "IdpSignKeyRefreshEnabled": false,
+        "OIDCConfigEndpoint": ""
+      },
+      "IdpManagerConfig": {
+        "ManagerType": "none",
+        "ClientConfig": {
+          "Issuer": "",
+          "TokenEndpoint": "",
+          "ClientID": "",
+          "ClientSecret": "",
+          "GrantType": ""
+        }
+      },
+      "DeviceAuthorizationFlow": {
+        "Provider": "hosted",
+        "ProviderConfig": {
+          "Audience": "",
+          "Domain": "",
+          "ClientID": "",
+          "TokenEndpoint": "",
+          "DeviceAuthEndpoint": "",
+          "Scope": "",
+          "UseIDToken": false
+        }
+      },
+      "PKCEAuthorizationFlow": {
+        "ProviderConfig": {
+          "Audience": "",
+          "ClientID": "",
+          "ClientSecret": "",
+          "AuthorizationEndpoint": "",
+          "TokenEndpoint": "",
+          "Scope": "",
+          "RedirectURLs": [],
+          "UseIDToken": false
+        }
+      }
+    }
+---
