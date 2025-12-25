@@ -17,6 +17,15 @@ spec:
         app.kubernetes.io/name: netbird-management
         app.kubernetes.io/component: management
     spec:
+      initContainers:
+        - name: init-config
+          image: busybox:latest
+          command: ['sh', '-c', 'if [ ! -f /var/lib/netbird/management.json ]; then cp /config/management.json /var/lib/netbird/management.json; fi']
+          volumeMounts:
+            - name: management-data
+              mountPath: /var/lib/netbird
+            - name: management-config
+              mountPath: /config
       containers:
         - name: management
           image: netbirdio/management:latest
@@ -40,7 +49,7 @@ spec:
             - name: NETBIRD_MGMT_DATADIR
               value: "/var/lib/netbird"
             - name: NETBIRD_MGMT_CONFIG
-              value: "/etc/netbird/management.json"
+              value: "/var/lib/netbird/management.json"
             - name: NETBIRD_MGMT_LOG_LEVEL
               value: "info"
             # IdP integration - initially without IDP for basic setup
@@ -56,10 +65,6 @@ spec:
           volumeMounts:
             - name: management-data
               mountPath: /var/lib/netbird
-            - name: management-config
-              mountPath: /etc/netbird/management.json
-              subPath: management.json
-              readOnly: true
           resources:
             requests:
               memory: "256Mi"
