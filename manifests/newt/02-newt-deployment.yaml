@@ -19,31 +19,20 @@ spec:
       - name: newt
         image: fosrl/newt:latest
         imagePullPolicy: Always
-        env:
-        - name: NEWT_ID
-          valueFrom:
-            secretKeyRef:
-              name: newt-credentials
-              key: NEWT_ID
-        - name: NEWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: newt-credentials
-              key: NEWT_SECRET
-        - name: PANGOLIN_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: newt-credentials
-              key: PANGOLIN_ENDPOINT
-        args:
-          - --id=$(NEWT_ID)
-          - --secret=$(NEWT_SECRET)
-          - --endpoint=$(PANGOLIN_ENDPOINT)
+        envFrom:
+        - secretRef:
+            name: newt-credentials
         securityContext:
           capabilities:
             add:
               - NET_ADMIN
               - NET_RAW
+        volumeMounts:
+        - name: config
+          mountPath: /root/.config/newt-client
+      volumes:
+      - name: config
+        emptyDir: {}
         resources:
           requests:
             memory: "64Mi"
