@@ -33,6 +33,11 @@ spec:
               value: "true"
             - name: DOMAIN
               value: "https://vault.k3s.dahan.house" # Important for Vaultwarden's internal configuration
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-admin-token
+                  key: ADMIN_TOKEN
           volumeMounts:
             - name: data
               mountPath: /data
