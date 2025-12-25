@@ -16,6 +16,13 @@ spec:
     - host: pangolin.k3s.dahan.house
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: pangolin
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
