@@ -8,9 +8,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: shellngn
-    port: 4200
-    targetPort: 4200
+  - name: wetty
+    port: 3000
+    targetPort: 3000
     protocol: TCP
   - name: code-server
     port: 8080
