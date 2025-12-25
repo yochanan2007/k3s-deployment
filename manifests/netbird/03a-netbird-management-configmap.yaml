@@ -47,7 +47,7 @@ data:
         "Address": "0.0.0.0:80",
         "AuthIssuer": "https://auth.k3s.dahan.house/application/o/netbird/",
         "AuthAudience": "netbird",
-        "AuthKeysLocation": "",
+        "AuthKeysLocation": "https://auth.k3s.dahan.house/application/o/netbird/jwks/",
         "AuthUserIDClaim": "sub",
         "CertFile": "",
         "CertKey": "",
@@ -55,14 +55,7 @@ data:
         "OIDCConfigEndpoint": "https://auth.k3s.dahan.house/application/o/netbird/.well-known/openid-configuration"
       },
       "IdpManagerConfig": {
-        "ManagerType": "authentik",
-        "ClientConfig": {
-          "Issuer": "https://auth.k3s.dahan.house/application/o/netbird/",
-          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
-          "ClientID": "netbird",
-          "ClientSecret": "rG56DD5xMc0ukIyxhSbVWgzZ1v8gaSSVoVGSjaoPqUG3yYAwvsYrfRGD7ZthFBqKWzSLHSa5E71j51N5Oq94QjbzKeZvJhbXH7zYiLhYCJqFDC2AbWC3eiAbSwZKMJOM",
-          "GrantType": "client_credentials"
-        }
+        "ManagerType": "none"
       },
       "DeviceAuthorizationFlow": {
         "Provider": "none",
