@@ -4,31 +4,24 @@ metadata:
   name: claude-home-init
   namespace: claude-code-home
 data:
-  docker-entrypoint.sh: |
+  init-packages.sh: |
     #!/bin/bash
     set -e
 
-    echo "=== Claude Code Home Initialization ==="
+    echo "=== Claude Code Home Package Installation ==="
 
-    # Check if initialization has already been done
-    INIT_MARKER="/home/claude/workspace/.initialized"
-    if [ -f "$INIT_MARKER" ]; then
-      echo "Initialization already completed, skipping..."
-      # Just start SSH
-      mkdir -p /var/run/sshd
-      echo "Starting SSH server..."
-      /usr/sbin/sshd -D
+    # Check if already initialized
+    if [ -f /opt/tools/.initialized ]; then
+      echo "Packages already installed, skipping..."
       exit 0
     fi
-
-    echo "First run detected, installing packages..."
 
     # Update package lists
     apt-get update
 
-    # Install basic tools
-    echo "Installing basic tools..."
-    apt-get install -y \
+    # Install ALL packages in one go (faster)
+    echo "Installing all packages..."
+    apt-get install -y --no-install-recommends \
       openssh-server \
       sudo \
       curl \
@@ -44,43 +37,12 @@ data:
       ca-certificates \
       gnupg \
       lsb-release \
-      software-properties-common
-
-    # Install Python 3 and pip
-    echo "Installing Python 3 and pip..."
-    apt-get install -y \
+      software-properties-common \
       python3 \
       python3-pip \
       python3-venv \
-      python3-dev
-
-    # Create symlinks for python/pip
-    ln -sf /usr/bin/python3 /usr/bin/python || true
-    ln -sf /usr/bin/pip3 /usr/bin/pip || true
-
-    # Install Node.js (for various dev tools)
-    echo "Installing Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt-get install -y nodejs
-
-    # Install Docker CLI (for managing containers)
-    echo "Installing Docker CLI..."
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-    apt-get update
-    apt-get install -y docker-ce-cli
-
-    # Install kubectl
-    echo "Installing kubectl..."
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-    rm kubectl
-
-    # Install additional development tools
-    echo "Installing additional dev tools..."
-    apt-get install -y \
+      python3-dev \
       jq \
-      yq \
       tmux \
       screen \
       tree \
@@ -91,15 +53,63 @@ data:
       bzip2 \
       xz-utils
 
-    # Install claude-code CLI (if available via npm)
-    echo "Attempting to install claude-code CLI..."
-    npm install -g @anthropic-ai/claude-code || echo "claude-code CLI not available via npm, skipping..."
+    # Create symlinks for python/pip
+    ln -sf /usr/bin/python3 /usr/bin/python
+    ln -sf /usr/bin/pip3 /usr/bin/pip
 
-    # Create claude user
-    echo "Creating user 'claude'..."
+    # Install Node.js
+    echo "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+
+    # Install Docker CLI
+    echo "Installing Docker CLI..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt-get update
+    apt-get install -y docker-ce-cli docker-buildx-plugin docker-compose-plugin
+
+    # Install kubectl
+    echo "Installing kubectl..."
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    install -o root -g root -m 0755 kubectl /opt/tools/kubectl
+    ln -sf /opt/tools/kubectl /usr/local/bin/kubectl
+    rm kubectl
+
+    # Install yq from GitHub
+    echo "Installing yq..."
+    YQ_VERSION="v4.40.5"
+    wget -qO /opt/tools/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+    chmod +x /opt/tools/yq
+    ln -sf /opt/tools/yq /usr/local/bin/yq
+
+    # Install ttyd for web terminal
+    echo "Installing ttyd..."
+    TTYD_VERSION="1.7.7"
+    wget -qO /opt/tools/ttyd "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64"
+    chmod +x /opt/tools/ttyd
+    ln -sf /opt/tools/ttyd /usr/local/bin/ttyd
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Create marker
+    echo "$(date): Package installation completed" > /opt/tools/.initialized
+
+    echo "=== Package Installation Complete ==="
+
+  start-services.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "=== Starting Claude Code Home Services ==="
+
+    # Create claude user if doesn't exist
     if ! id -u claude > /dev/null 2>&1; then
-      groupadd -g ${CLAUDE_GID} claude
-      useradd -m -u ${CLAUDE_UID} -g ${CLAUDE_GID} -s /bin/bash claude
+      echo "Creating user 'claude'..."
+      groupadd -g 1000 claude
+      useradd -m -u 1000 -g 1000 -s /bin/bash claude
       echo "claude:claude123" | chpasswd
       usermod -aG sudo claude
       echo "claude ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
@@ -119,10 +129,12 @@ data:
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
     sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
     echo "AllowUsers claude" >> /etc/ssh/sshd_config
 
     # Set up user environment
-    cat > /home/claude/.bashrc << 'EOF'
+    if [ ! -f /home/claude/.bashrc ]; then
+      cat > /home/claude/.bashrc << 'EOFBASH'
     # .bashrc for claude user
 
     # If not running interactively, don't do anything
@@ -160,91 +172,25 @@ data:
     echo "==================================="
     echo "  Claude Code Development Home"
     echo "==================================="
-    echo "Workspace: /home/claude/workspace"
+    echo "Workspace: ~/workspace"
     echo "Tools: python, node, docker, kubectl"
+    echo "Web Terminal: https://claude.k3s.dahan.house"
     echo "==================================="
-    EOF
+    EOFBASH
+      chown claude:claude /home/claude/.bashrc
+    fi
 
-    chown claude:claude /home/claude/.bashrc
-
-    # Create a simple web interface (optional)
-    cat > /home/claude/webserver.py << 'EOF'
-    #!/usr/bin/env python3
-    from http.server import HTTPServer, BaseHTTPRequestHandler
-    import subprocess
-    import json
-
-    class InfoHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-
-            html = """
-            <html>
-            <head>
-                <title>Claude Code Home</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-                    .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                    h1 { color: #333; }
-                    .status { background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 20px 0; }
-                    .info { margin: 10px 0; }
-                    pre { background: #263238; color: #aed581; padding: 15px; border-radius: 5px; overflow-x: auto; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Claude Code Development Home</h1>
-                    <div class="status">
-                        <h2>System Status: Running</h2>
-                        <div class="info">SSH Access: Port 22 via LoadBalancer IP</div>
-                        <div class="info">User: claude</div>
-                        <div class="info">Workspace: /home/claude/workspace</div>
-                    </div>
-                    <h2>Installed Tools</h2>
-                    <pre>
-    Python:  {python_version}
-    Node:    {node_version}
-    Docker:  {docker_version}
-    Kubectl: {kubectl_version}
-    Git:     {git_version}
-                    </pre>
-                </div>
-            </body>
-            </html>
-            """.format(
-                python_version=subprocess.getoutput('python3 --version'),
-                node_version=subprocess.getoutput('node --version'),
-                docker_version=subprocess.getoutput('docker --version'),
-                kubectl_version=subprocess.getoutput('kubectl version --client --short 2>/dev/null || echo "Installed"'),
-                git_version=subprocess.getoutput('git --version')
-            )
-
-            self.wfile.write(html.encode())
-
-    if __name__ == '__main__':
-        server = HTTPServer(('0.0.0.0', 8080), InfoHandler)
-        print('Web server running on port 8080...')
-        server.serve_forever()
-    EOF
-
-    chmod +x /home/claude/webserver.py
-    chown claude:claude /home/claude/webserver.py
-
-    # Start web server in background
-    su - claude -c "nohup python3 /home/claude/webserver.py > /tmp/webserver.log 2>&1 &"
-
-    # Clean up
-    apt-get clean
-    rm -rf /var/lib/apt/lists/*
-
-    # Create marker file to prevent re-initialization
-    echo "$(date): Initialization completed" > "$INIT_MARKER"
-    chown claude:claude "$INIT_MARKER"
-
-    echo "=== Initialization Complete ==="
+    # Start SSH server in background
     echo "Starting SSH server..."
+    /usr/sbin/sshd
 
-    # Start SSH server
-    /usr/sbin/sshd -D
+    # Start ttyd web terminal
+    echo "Starting ttyd web terminal on port 8080..."
+    exec /usr/local/bin/ttyd \
+      --port 8080 \
+      --interface 0.0.0.0 \
+      --credential claude:claude123 \
+      --writable \
+      --title-format "Claude Code Home - Terminal" \
+      --max-clients 10 \
+      su - claude

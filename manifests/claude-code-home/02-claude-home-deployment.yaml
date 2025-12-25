@@ -15,6 +15,29 @@ spec:
       labels:
         app.kubernetes.io/name: claude-code-home
     spec:
+      # Init container to install packages once
+      initContainers:
+      - name: install-packages
+        image: ubuntu:22.04
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "/scripts/init-packages.sh"]
+        volumeMounts:
+        - name: tools
+          mountPath: /opt/tools
+        - name: init-script
+          mountPath: /scripts
+        env:
+        - name: DEBIAN_FRONTEND
+          value: "noninteractive"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "2000m"
+
+      # Main container to run services
       containers:
       - name: claude-dev
         image: ubuntu:22.04
@@ -29,32 +52,28 @@ spec:
         volumeMounts:
         - name: workspace
           mountPath: /home/claude/workspace
+        - name: tools
+          mountPath: /opt/tools
         - name: init-script
-          mountPath: /docker-entrypoint.sh
-          subPath: docker-entrypoint.sh
+          mountPath: /scripts
         env:
         - name: DEBIAN_FRONTEND
           value: "noninteractive"
         - name: TZ
           value: "America/New_York"
-        - name: CLAUDE_USER
-          value: "claude"
-        - name: CLAUDE_UID
-          value: "1000"
-        - name: CLAUDE_GID
-          value: "1000"
-        command: ["/bin/bash", "/docker-entrypoint.sh"]
+        command: ["/bin/bash", "/scripts/start-services.sh"]
         readinessProbe:
-          tcpSocket:
-            port: 22
-          initialDelaySeconds: 30
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 30
+          failureThreshold: 3
         livenessProbe:
           tcpSocket:
             port: 22
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 20
           timeoutSeconds: 5
           failureThreshold: 3
@@ -68,10 +87,13 @@ spec:
           limits:
             memory: "2Gi"
             cpu: "2000m"
+
       volumes:
       - name: workspace
         persistentVolumeClaim:
           claimName: claude-home-workspace
+      - name: tools
+        emptyDir: {}
       - name: init-script
         configMap:
           name: claude-home-init
