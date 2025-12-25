@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homer-ingress
+  namespace: homer
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - homer.k3s.dahan.house
+    secretName: k3s-dahan-house-tls
+  rules:
+    - host: homer.k3s.dahan.house
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homer
+                port:
+                  number: 80
+---
