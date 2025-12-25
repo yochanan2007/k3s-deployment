@@ -20,4 +20,8 @@ spec:
       port: 3002
       targetPort: 3002
       protocol: TCP
+    - name: api
+      port: 3001
+      targetPort: 5050
+      protocol: TCP
 ---
