@@ -55,16 +55,7 @@ data:
         "OIDCConfigEndpoint": "https://auth.k3s.dahan.house/application/o/netbird/.well-known/openid-configuration"
       },
       "IdpManagerConfig": {
-        "ManagerType": "authentik",
-        "ClientConfig": {
-          "Issuer": "https://auth.k3s.dahan.house/application/o/netbird/",
-          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
-          "ClientID": "netbird",
-          "ClientSecret": "",
-          "GrantType": "client_credentials",
-          "Username": "netbird-service",
-          "Password": "0pjannR7Qt3sXaNjfo78QYjbHIUhOczve1fQDcDV7agFftFOiVdWe8rF3gcj"
-        }
+        "ManagerType": "none"
       },
       "DeviceAuthorizationFlow": {
         "Provider": "hosted",

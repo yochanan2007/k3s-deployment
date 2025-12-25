@@ -50,15 +50,9 @@ spec:
               value: "/var/lib/netbird"
             - name: NETBIRD_MGMT_LOG_LEVEL
               value: "info"
-            # Authentik IdP integration (following official Netbird docs)
+            # No IDP manager needed - auth handled via OIDC in HttpConfig
             - name: NETBIRD_MGMT_IDP
-              value: "authentik"
-            - name: NETBIRD_IDP_MGMT_CLIENT_ID
-              value: "netbird"
-            - name: NETBIRD_IDP_MGMT_EXTRA_USERNAME
-              value: "netbird-service"
-            - name: NETBIRD_IDP_MGMT_EXTRA_PASSWORD
-              value: "0pjannR7Qt3sXaNjfo78QYjbHIUhOczve1fQDcDV7agFftFOiVdWe8rF3gcj"
+              value: "none"
           ports:
             - name: http-grpc
               containerPort: 33073
