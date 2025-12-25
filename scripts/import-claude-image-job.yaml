@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: import-claude-image
+  namespace: claude
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: importer
+        image: rancher/k3s:v1.33.6-k3s1
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Importing Claude development container image..."
+          ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import /host-tmp/claude-dev.tar
+          echo "Verifying image import..."
+          ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images list | grep claude-dev || echo "Image not found after import"
+          echo "Image imported successfully!"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: containerd-sock
+          mountPath: /run/k3s/containerd/containerd.sock
+        - name: tmp-volume
+          mountPath: /host-tmp
+      volumes:
+      - name: containerd-sock
+        hostPath:
+          path: /run/k3s/containerd/containerd.sock
+          type: Socket
+      - name: tmp-volume
+        hostPath:
+          path: /tmp
+          type: Directory

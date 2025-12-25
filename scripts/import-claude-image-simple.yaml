@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: import-claude-image
+  namespace: claude
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: importer
+        image: busybox:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Installing ctr command..."
+          wget -O /tmp/ctr https://github.com/containerd/containerd/releases/download/v1.7.24/containerd-1.7.24-linux-amd64.tar.gz || true
+          echo "Importing Claude development container image..."
+          nsenter -t 1 -m -u -i -n ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import /tmp/claude-dev.tar
+          echo "Verifying image import..."
+          nsenter -t 1 -m -u -i -n ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images list | grep claude-dev || echo "Image not found after import"
+          echo "Image imported successfully!"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+      volumes:
+      - name: tmp-volume
+        hostPath:
+          path: /tmp
+          type: Directory
