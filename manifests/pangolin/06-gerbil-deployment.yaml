@@ -22,7 +22,7 @@ spec:
         args:
           - --reachableAt=http://gerbil:3004
           - --generateAndSaveKeyTo=/var/config/key
-          - --remoteConfig=http://pangolin:3001/api/v1/
+          - --remoteConfig=http://10.0.200.244/api/v1/
         ports:
         - containerPort: 51820
           protocol: UDP

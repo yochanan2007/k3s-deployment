@@ -30,9 +30,6 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /root/.config/newt-client
-      volumes:
-      - name: config
-        emptyDir: {}
         resources:
           requests:
             memory: "64Mi"
@@ -40,4 +37,7 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "500m"
+      volumes:
+      - name: config
+        emptyDir: {}
       restartPolicy: Always
