@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: vaultwarden
-          image: vaultwarden/server:latest
-          imagePullPolicy: IfNotPresent
+          image: vaultwarden/server:testing  # Use testing image for OIDC support
+          imagePullPolicy: Always  # Always pull testing image for updates
           ports:
             - name: http
               containerPort: 80
@@ -38,6 +38,31 @@ spec:
                 secretKeyRef:
                   name: vaultwarden-admin-token
                   key: ADMIN_TOKEN
+            # OIDC/SSO Configuration
+            - name: SSO_ENABLED
+              value: "true"
+            - name: SSO_AUTHORITY
+              value: "https://auth.k3s.dahan.house/application/o/vaultwarden/"
+            - name: SSO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-oidc
+                  key: SSO_CLIENT_ID
+            - name: SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-oidc
+                  key: SSO_CLIENT_SECRET
+            - name: SSO_SCOPES
+              value: "openid email profile offline_access"
+            - name: SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION
+              value: "false"
+            - name: SSO_CLIENT_CACHE_EXPIRATION
+              value: "0"
+            - name: SSO_ONLY
+              value: "false"  # Allow both SSO and traditional login
+            - name: SSO_SIGNUPS_MATCH_EMAIL
+              value: "true"  # Auto-link SSO login to existing accounts with matching email
           volumeMounts:
             - name: data
               mountPath: /data
