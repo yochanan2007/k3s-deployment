@@ -15,11 +15,29 @@ spec:
       labels:
         app.kubernetes.io/name: claude
     spec:
+      initContainers:
+      - name: fix-entrypoint
+        image: ghcr.io/dahanhouse/claude-dev:latest
+        imagePullPolicy: Never
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Copy entrypoint.sh to shared volume
+          cp /entrypoint.sh /scripts/entrypoint.sh
+          # Convert CRLF to LF
+          sed -i 's/\r$//' /scripts/entrypoint.sh
+          # Make executable
+          chmod +x /scripts/entrypoint.sh
+          echo "Entrypoint fixed and ready"
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
       containers:
       - name: claude
         image: ghcr.io/dahanhouse/claude-dev:latest
         imagePullPolicy: Never
-        command: ["/bin/bash", "/entrypoint.sh"]
+        command: ["/bin/bash", "/scripts/entrypoint.sh"]
         ports:
         - name: ssh
           containerPort: 22
@@ -33,6 +51,8 @@ spec:
         volumeMounts:
         - name: claude-home
           mountPath: /home/claude
+        - name: scripts
+          mountPath: /scripts
         securityContext:
           runAsUser: 0  # Run as root initially to set permissions
           capabilities:
@@ -52,3 +72,5 @@ spec:
       - name: claude-home
         persistentVolumeClaim:
           claimName: claude-home
+      - name: scripts
+        emptyDir: {}
