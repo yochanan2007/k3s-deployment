@@ -23,8 +23,8 @@ spec:
         - name: ssh
           containerPort: 22
           protocol: TCP
-        - name: shellngn
-          containerPort: 4200
+        - name: wetty
+          containerPort: 3000
           protocol: TCP
         - name: code-server
           containerPort: 8080

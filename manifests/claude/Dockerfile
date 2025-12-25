@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     gnupg \
     lsb-release \
+    build-essential \
+    python3 \
     && useradd -m -s /bin/bash -u 1000 ${USER} \
     && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && mkdir -p /var/run/sshd
@@ -24,9 +26,9 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Install SHELLNGN (shell in the cloud with HTTPS)
-RUN npm install -g shellngn \
-    && mkdir -p ${HOME}/.shellngn
+# Install wetty (web-based terminal with HTTPS support)
+RUN npm install -g wetty \
+    && mkdir -p ${HOME}/.wetty
 
 # Install VSCode Server (code-server)
 RUN curl -fsSL https://code-server.dev/install.sh | sh
@@ -51,8 +53,8 @@ RUN chmod +x /entrypoint.sh
 
 # Expose ports
 # 22: SSH
-# 4200: SHELLNGN HTTPS
+# 3000: wetty HTTPS
 # 8080: code-server
-EXPOSE 22 4200 8080
+EXPOSE 22 3000 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
