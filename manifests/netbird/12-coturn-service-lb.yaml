@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: coturn
     app.kubernetes.io/component: turn
   annotations:
-    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/address-pool: first-pool
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.0.200.17
