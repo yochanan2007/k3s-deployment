@@ -45,52 +45,17 @@ data:
       },
       "HttpConfig": {
         "Address": "0.0.0.0:80",
-        "AuthIssuer": "https://auth.k3s.dahan.house/application/o/netbird/",
-        "AuthAudience": "netbird",
-        "AuthKeysLocation": "",
-        "AuthUserIDClaim": "sub",
         "CertFile": "",
-        "CertKey": "",
-        "IdpSignKeyRefreshEnabled": true,
-        "OIDCConfigEndpoint": "https://auth.k3s.dahan.house/application/o/netbird/.well-known/openid-configuration"
+        "CertKey": ""
       },
       "IdpManagerConfig": {
-        "ManagerType": "authentik",
-        "ClientConfig": {
-          "Issuer": "https://auth.k3s.dahan.house/application/o/netbird/",
-          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
-          "ClientID": "netbird",
-          "ClientSecret": "rG56DD5xMc0ukIyxhSbVWgzZ1v8gaSSVoVGSjaoPqUG3yYAwvsYrfRGD7ZthFBqKWzSLHSa5E71j51N5Oq94QjbzKeZvJhbXH7zYiLhYCJqFDC2AbWC3eiAbSwZKMJOM",
-          "GrantType": "client_credentials"
-        }
+        "ManagerType": "none"
       },
       "DeviceAuthorizationFlow": {
-        "Provider": "none",
-        "ProviderConfig": {
-          "Audience": "netbird",
-          "Domain": "auth.k3s.dahan.house",
-          "ClientID": "netbird",
-          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
-          "DeviceAuthEndpoint": "https://auth.k3s.dahan.house/application/o/device/authorize/",
-          "Scope": "openid profile email offline_access",
-          "UseIDToken": true
-        }
+        "Provider": "none"
       },
       "PKCEAuthorizationFlow": {
-        "ProviderConfig": {
-          "Audience": "netbird",
-          "ClientID": "netbird",
-          "ClientSecret": "rG56DD5xMc0ukIyxhSbVWgzZ1v8gaSSVoVGSjaoPqUG3yYAwvsYrfRGD7ZthFBqKWzSLHSa5E71j51N5Oq94QjbzKeZvJhbXH7zYiLhYCJqFDC2AbWC3eiAbSwZKMJOM",
-          "AuthorizationEndpoint": "https://auth.k3s.dahan.house/application/o/authorize/",
-          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
-          "Scope": "openid profile email offline_access",
-          "RedirectURLs": [
-            "https://netbird.k3s.dahan.house/",
-            "https://netbird.k3s.dahan.house/silent-auth",
-            "https://netbird-api.k3s.dahan.house/"
-          ],
-          "UseIDToken": true
-        }
+        "ProviderConfig": {}
       }
     }
 ---
