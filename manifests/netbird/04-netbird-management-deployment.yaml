@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbird-management
+  namespace: netbird
+  labels:
+    app.kubernetes.io/name: netbird-management
+    app.kubernetes.io/component: management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-management
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbird-management
+        app.kubernetes.io/component: management
+    spec:
+      containers:
+        - name: management
+          image: netbirdio/management:latest
+          imagePullPolicy: Always
+          command:
+            - "/usr/bin/netbird-mgmt"
+            - "management"
+            - "--port"
+            - "33073"
+            - "--log-file"
+            - "console"
+            - "--log-level"
+            - "info"
+            - "--disable-anonymous-metrics"
+            - "false"
+            - "--single-account-mode-domain"
+            - "netbird.k3s.dahan.house"
+            - "--dns-domain"
+            - "netbird.selfhosted"
+          env:
+            - name: NETBIRD_MGMT_API_PORT
+              value: "33073"
+            - name: NETBIRD_MGMT_DATADIR
+              value: "/var/lib/netbird"
+            - name: NETBIRD_MGMT_CONFIG
+              value: "/etc/netbird/management.json"
+            - name: NETBIRD_MGMT_LOG_LEVEL
+              value: "info"
+            # IdP integration - initially without IDP for basic setup
+            - name: NETBIRD_MGMT_IDP
+              value: "none"
+          ports:
+            - name: grpc
+              containerPort: 33073
+              protocol: TCP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: management-data
+              mountPath: /var/lib/netbird
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            tcpSocket:
+              port: 33073
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 33073
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: management-data
+          persistentVolumeClaim:
+            claimName: netbird-management-data
+---

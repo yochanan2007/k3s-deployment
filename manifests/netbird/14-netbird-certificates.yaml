@@ -1,0 +1,39 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbird-dashboard-cert
+  namespace: netbird
+spec:
+  secretName: netbird-dashboard-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - netbird.k3s.dahan.house
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbird-api-cert
+  namespace: netbird
+spec:
+  secretName: netbird-api-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - netbird-api.k3s.dahan.house
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbird-signal-cert
+  namespace: netbird
+spec:
+  secretName: netbird-signal-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - netbird-signal.k3s.dahan.house
+---
