@@ -22,6 +22,11 @@ spec:
         envFrom:
         - secretRef:
             name: newt-credentials
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+              - NET_RAW
         resources:
           requests:
             memory: "64Mi"
