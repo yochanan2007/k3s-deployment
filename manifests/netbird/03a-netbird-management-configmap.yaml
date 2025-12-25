@@ -45,17 +45,53 @@ data:
       },
       "HttpConfig": {
         "Address": "0.0.0.0:80",
+        "AuthIssuer": "https://auth.k3s.dahan.house/application/o/netbird/",
+        "AuthAudience": "netbird",
+        "AuthKeysLocation": "https://auth.k3s.dahan.house/application/o/netbird/jwks/",
+        "AuthUserIDClaim": "",
         "CertFile": "",
-        "CertKey": ""
+        "CertKey": "",
+        "IdpSignKeyRefreshEnabled": true,
+        "OIDCConfigEndpoint": "https://auth.k3s.dahan.house/application/o/netbird/.well-known/openid-configuration"
       },
       "IdpManagerConfig": {
-        "ManagerType": "none"
+        "ManagerType": "authentik",
+        "ClientConfig": {
+          "Issuer": "https://auth.k3s.dahan.house/application/o/netbird/",
+          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
+          "ClientID": "netbird",
+          "ClientSecret": "",
+          "GrantType": "client_credentials",
+          "Username": "netbird-service",
+          "Password": "0pjannR7Qt3sXaNjfo78QYjbHIUhOczve1fQDcDV7agFftFOiVdWe8rF3gcj"
+        }
       },
       "DeviceAuthorizationFlow": {
-        "Provider": "none"
+        "Provider": "hosted",
+        "ProviderConfig": {
+          "Audience": "netbird",
+          "Domain": "auth.k3s.dahan.house",
+          "ClientID": "netbird",
+          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
+          "DeviceAuthEndpoint": "https://auth.k3s.dahan.house/application/o/device/",
+          "Scope": "openid profile email offline_access api",
+          "UseIDToken": false
+        }
       },
       "PKCEAuthorizationFlow": {
-        "ProviderConfig": {}
+        "ProviderConfig": {
+          "Audience": "netbird",
+          "ClientID": "netbird",
+          "ClientSecret": "",
+          "AuthorizationEndpoint": "https://auth.k3s.dahan.house/application/o/authorize/",
+          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
+          "Scope": "openid profile email offline_access api",
+          "RedirectURLs": [
+            "https://netbird.k3s.dahan.house/auth",
+            "https://netbird.k3s.dahan.house/silent-auth"
+          ],
+          "UseIDToken": false
+        }
       }
     }
 ---
