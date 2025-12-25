@@ -27,21 +27,21 @@ spec:
               value: "https://netbird-api.k3s.dahan.house"
             - name: NETBIRD_MGMT_GRPC_API_ENDPOINT
               value: "https://netbird-api.k3s.dahan.house"
-            # Disable auth initially for basic access
+            # Authentik OIDC configuration
             - name: AUTH_AUDIENCE
               value: "netbird"
             - name: AUTH_CLIENT_ID
-              value: ""
+              value: "netbird"
             - name: AUTH_AUTHORITY
-              value: ""
+              value: "https://auth.k3s.dahan.house/application/o/netbird/"
             - name: USE_AUTH0
               value: "false"
             - name: AUTH_SUPPORTED_SCOPES
-              value: ""
+              value: "openid profile email offline_access"
             - name: AUTH_REDIRECT_URI
-              value: ""
+              value: "https://netbird.k3s.dahan.house/"
             - name: AUTH_SILENT_REDIRECT_URI
-              value: ""
+              value: "https://netbird.k3s.dahan.house/silent-auth"
             - name: NGINX_SSL_PORT
               value: "443"
           ports:
