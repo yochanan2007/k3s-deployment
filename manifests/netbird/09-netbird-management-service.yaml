@@ -11,12 +11,8 @@ spec:
   selector:
     app.kubernetes.io/name: netbird-management
   ports:
-    - name: grpc
+    - name: http-grpc
       port: 33073
       targetPort: 33073
-      protocol: TCP
-    - name: http
-      port: 80
-      targetPort: 80
       protocol: TCP
 ---

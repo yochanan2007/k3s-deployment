@@ -26,19 +26,12 @@ spec:
     - web
     - websecure
   routes:
-    # HTTP API routes
-    - match: Host(`netbird-api.k3s.dahan.house`) && PathPrefix(`/api`)
-      kind: Rule
-      services:
-        - name: netbird-management
-          port: 80
-    # gRPC Management routes
-    - match: Host(`netbird-api.k3s.dahan.house`) && PathPrefix(`/management.ManagementService/`)
+    # HTTP API and gRPC routes (same port)
+    - match: Host(`netbird-api.k3s.dahan.house`)
       kind: Rule
       services:
         - name: netbird-management
           port: 33073
-          scheme: h2c
   tls:
     secretName: netbird-api-tls
 ---
