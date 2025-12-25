@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gerbil
+  namespace: pangolin-dmz
+spec:
+  selector:
+    app: gerbil
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  - name: api
+    port: 3004
+    targetPort: 3004
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gerbil-udp
+  namespace: pangolin-dmz
+  annotations:
+    metallb.universe.tf/address-pool: dmz-pool
+    metallb.universe.tf/loadBalancerIPs: 10.0.201.10
+spec:
+  selector:
+    app: gerbil
+  type: LoadBalancer
+  ports:
+  - name: wireguard
+    port: 51820
+    targetPort: 51820
+    protocol: UDP
+  - name: wg-alt
+    port: 21820
+    targetPort: 21820
+    protocol: UDP
