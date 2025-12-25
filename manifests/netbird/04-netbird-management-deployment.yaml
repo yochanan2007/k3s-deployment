@@ -20,10 +20,10 @@ spec:
       initContainers:
         - name: init-config
           image: busybox:latest
-          command: ['sh', '-c', 'if [ ! -f /var/lib/netbird/management.json ]; then cp /config/management.json /var/lib/netbird/management.json; fi']
+          command: ['sh', '-c', 'mkdir -p /etc/netbird && if [ ! -f /etc/netbird/management.json ]; then cp /config/management.json /etc/netbird/management.json; fi']
           volumeMounts:
-            - name: management-data
-              mountPath: /var/lib/netbird
+            - name: config-dir
+              mountPath: /etc/netbird
             - name: management-config
               mountPath: /config
       containers:
@@ -48,8 +48,6 @@ spec:
               value: "33073"
             - name: NETBIRD_MGMT_DATADIR
               value: "/var/lib/netbird"
-            - name: NETBIRD_MGMT_CONFIG
-              value: "/var/lib/netbird/management.json"
             - name: NETBIRD_MGMT_LOG_LEVEL
               value: "info"
             # IdP integration - initially without IDP for basic setup
@@ -65,6 +63,8 @@ spec:
           volumeMounts:
             - name: management-data
               mountPath: /var/lib/netbird
+            - name: config-dir
+              mountPath: /etc/netbird
           resources:
             requests:
               memory: "256Mi"
@@ -86,6 +86,8 @@ spec:
         - name: management-data
           persistentVolumeClaim:
             claimName: netbird-management-data
+        - name: config-dir
+          emptyDir: {}
         - name: management-config
           configMap:
             name: netbird-management-config
