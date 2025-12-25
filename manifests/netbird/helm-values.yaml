@@ -1,0 +1,191 @@
+# Netbird Helm Chart Values with Authentik Integration
+# Following official Netbird documentation
+
+global:
+  namespace: netbird
+
+management:
+  enabled: true
+  replicaCount: 1
+
+  configmap: |
+    {
+      "Stuns": [
+        {
+          "Proto": "udp",
+          "URI": "stun:stun.netbird.io:3478"
+        }
+      ],
+      "TURNConfig": {
+        "Turns": [],
+        "CredentialsTTL": "12h",
+        "Secret": "",
+        "TimeBasedCredentials": false
+      },
+      "Signal": {
+        "Proto": "http",
+        "URI": "netbird-signal.netbird.svc.cluster.local:80"
+      },
+      "Datadir": "/var/lib/netbird",
+      "DataStoreEncryptionKey": "H3kYto2qsSgaQZQWjtgOvM0gGi8IKgajfAElOBevBL0=",
+      "StoreConfig": {
+        "Engine": "sqlite"
+      },
+      "HttpConfig": {
+        "Address": "0.0.0.0:80",
+        "AuthIssuer": "https://auth.k3s.dahan.house/application/o/netbird/",
+        "AuthAudience": "netbird",
+        "AuthKeysLocation": "https://auth.k3s.dahan.house/application/o/netbird/jwks/",
+        "AuthUserIDClaim": "",
+        "OIDCConfigEndpoint": "https://auth.k3s.dahan.house/application/o/netbird/.well-known/openid-configuration",
+        "IdpSignKeyRefreshEnabled": true
+      },
+      "IdpManagerConfig": {
+        "ManagerType": "none"
+      },
+      "DeviceAuthorizationFlow": {
+        "Provider": "hosted",
+        "ProviderConfig": {
+          "Audience": "netbird",
+          "Domain": "auth.k3s.dahan.house",
+          "ClientID": "netbird",
+          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
+          "DeviceAuthEndpoint": "https://auth.k3s.dahan.house/application/o/device/",
+          "Scope": "openid profile email offline_access api",
+          "UseIDToken": false
+        }
+      },
+      "PKCEAuthorizationFlow": {
+        "ProviderConfig": {
+          "Audience": "netbird",
+          "ClientID": "netbird",
+          "ClientSecret": "",
+          "AuthorizationEndpoint": "https://auth.k3s.dahan.house/application/o/authorize/",
+          "TokenEndpoint": "https://auth.k3s.dahan.house/application/o/token/",
+          "Scope": "openid profile email offline_access api",
+          "RedirectURLs": [
+            "https://netbird.k3s.dahan.house/auth",
+            "https://netbird.k3s.dahan.house/silent-auth"
+          ],
+          "UseIDToken": false
+        }
+      }
+    }
+
+  podCommand:
+    args:
+      - --port=80
+      - --log-file=console
+      - --log-level=info
+      - --disable-anonymous-metrics=false
+      - --single-account-mode-domain=netbird.k3s.dahan.house
+      - --dns-domain=netbird.selfhosted
+
+  # Environment variables for Authentik OIDC
+  env:
+    NETBIRD_MGMT_IDP: "none"
+
+  containerPort: 80
+  grpcContainerPort: 33073
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  serviceGrpc:
+    type: ClusterIP
+    port: 33073
+
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+    hosts:
+      - host: netbird-api.k3s.dahan.house
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: netbird-api-tls
+        hosts:
+          - netbird-api.k3s.dahan.house
+
+dashboard:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: netbirdio/dashboard
+    tag: "v2.13.1"
+    pullPolicy: IfNotPresent
+
+  # Dashboard environment variables for Authentik
+  env:
+    NETBIRD_MGMT_API_ENDPOINT: "https://netbird-api.k3s.dahan.house"
+    NETBIRD_MGMT_GRPC_API_ENDPOINT: "https://netbird-api.k3s.dahan.house"
+    AUTH_AUTHORITY: "https://auth.k3s.dahan.house/application/o/netbird/"
+    USE_AUTH0: "false"
+    AUTH_CLIENT_ID: "netbird"
+    AUTH_SUPPORTED_SCOPES: "openid profile email offline_access api"
+    AUTH_AUDIENCE: "netbird"
+    AUTH_REDIRECT_URI: "/auth"
+    AUTH_SILENT_REDIRECT_URI: "/silent-auth"
+    NGINX_SSL_PORT: "443"
+
+  containerPort: 80
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+    hosts:
+      - host: netbird.k3s.dahan.house
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: netbird-dashboard-tls
+        hosts:
+          - netbird.k3s.dahan.house
+
+signal:
+  enabled: true
+  replicaCount: 1
+
+  containerPort: 80
+  grpcContainerPort: 10000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  serviceGrpc:
+    type: ClusterIP
+    port: 10000
+
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+    hosts:
+      - host: netbird-signal.k3s.dahan.house
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: netbird-signal-tls
+        hosts:
+          - netbird-signal.k3s.dahan.house
+
+relay:
+  enabled: false
+
+coturn:
+  enabled: false
