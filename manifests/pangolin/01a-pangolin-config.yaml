@@ -24,10 +24,15 @@ data:
       port_range_start: 21821
       port_range_end: 21920
 
+    traefik:
+      site_types: ["newt", "wireguard", "local"]
+
     flags:
       require_email_verification: false
       disable_signup_without_invite: false
       disable_user_create_org: false
+      disable_local_sites: false
+      disable_basic_wireguard_sites: false
 
     organizations:
       default_network_cidr: "10.20.0.0/16"
