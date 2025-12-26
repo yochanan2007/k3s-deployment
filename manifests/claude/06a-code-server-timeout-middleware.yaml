@@ -4,11 +4,6 @@ metadata:
   name: claude-code-timeout
   namespace: claude
 spec:
-  # Increase timeouts for code-server websocket connections
+  # Disable response buffering for websockets
   buffering:
-    # Disable response buffering for websockets
     maxResponseBodyBytes: 0
-  # Add custom headers for websocket support
-  headers:
-    customRequestHeaders:
-      X-Forwarded-Proto: "https"
