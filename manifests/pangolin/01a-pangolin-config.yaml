@@ -20,7 +20,7 @@ data:
       nextjs_port: 3000
 
     gerbil:
-      base_endpoint: "pangolin.k3s.dahan.house"
+      base_endpoint: "10.0.201.10"
       port_range_start: 21821
       port_range_end: 21920
 
