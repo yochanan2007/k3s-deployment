@@ -42,3 +42,7 @@ spec:
     port: 21820
     targetPort: 21820
     protocol: UDP
+  - name: api
+    port: 3004
+    targetPort: 3004
+    protocol: TCP
