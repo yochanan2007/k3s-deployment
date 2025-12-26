@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: claude-code-timeout
+  namespace: claude
+spec:
+  # Increase timeouts for code-server websocket connections
+  buffering:
+    # Disable response buffering for websockets
+    maxResponseBodyBytes: 0
+  # Add custom headers for websocket support
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"

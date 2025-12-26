@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: code-server-transport
+  namespace: claude
+spec:
+  # Disable response header timeout (0 = unlimited)
+  # This prevents websocket disconnections
+  serverName: code.k3s.dahan.house
+  insecureSkipVerify: false
+  # Increase all timeouts for stable websocket connections
+  forwardingTimeouts:
+    dialTimeout: 30s
+    responseHeaderTimeout: 0s  # Unlimited for websockets
+    idleConnTimeout: 3600s     # 1 hour

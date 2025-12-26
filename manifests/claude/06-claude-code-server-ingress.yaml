@@ -6,6 +6,15 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-dns"
     traefik.ingress.kubernetes.io/router.tls: "true"
+    # Increase timeouts for code-server websocket connections
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "code-server-session"
+    # Set response header timeout to 0 (unlimited) for websockets
+    traefik.ingress.kubernetes.io/service.passhostheader: "true"
+    # Use custom ServersTransport for extended timeouts
+    traefik.ingress.kubernetes.io/service.serverstransport: "code-server-transport@kubernetescrd"
+    # Apply timeout middleware
+    traefik.ingress.kubernetes.io/router.middlewares: "claude-code-timeout@kubernetescrd"
 spec:
   ingressClassName: traefik
   tls:
