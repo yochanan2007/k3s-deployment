@@ -31,7 +31,7 @@ spec:
       kind: Rule
       services:
         - name: netbird-management
-          port: 33073
+          port: 80
           scheme: h2c
   tls:
     secretName: netbird-api-tls
