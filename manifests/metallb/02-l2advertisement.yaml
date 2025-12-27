@@ -6,4 +6,6 @@ metadata:
 spec:
   ipAddressPools:
   - first-pool
+  interfaces:
+  - ens18
 ---

@@ -16,3 +16,5 @@ metadata:
 spec:
   ipAddressPools:
   - dmz-pool
+  interfaces:
+  - ens18
