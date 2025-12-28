@@ -1,3 +1,13 @@
+# NetBird IngressRoutes
+# Reference: https://docs.netbird.io/selfhosted/selfhosted-guide
+#
+# Supports two client connection modes:
+# 1. Single domain:   --management-url https://netbird.k3s.dahan.house
+# 2. Subdomains:      --management-url https://netbird-api.k3s.dahan.house --admin-url https://netbird.k3s.dahan.house
+#
+# gRPC requires path-based routing with h2c scheme for HTTP/2 cleartext
+---
+# Dashboard - main UI (netbird.k3s.dahan.house)
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -5,10 +15,9 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - web
     - websecure
   routes:
-    - match: Host(`netbird.k3s.dahan.house`)
+    - match: Host(`netbird.k3s.dahan.house`) && !PathPrefix(`/api`) && !PathPrefix(`/management.ManagementService/`) && !PathPrefix(`/signalexchange.SignalExchange/`)
       kind: Rule
       services:
         - name: netbird-dashboard
@@ -16,6 +25,63 @@ spec:
   tls:
     secretName: netbird-dashboard-tls
 ---
+# REST API on single domain
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-api
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`netbird.k3s.dahan.house`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: netbird-management
+          port: 80
+  tls:
+    secretName: netbird-dashboard-tls
+---
+# gRPC Management on single domain
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-management-grpc
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`netbird.k3s.dahan.house`) && PathPrefix(`/management.ManagementService/`)
+      kind: Rule
+      services:
+        - name: netbird-management
+          port: 33073
+          scheme: h2c
+  tls:
+    secretName: netbird-dashboard-tls
+---
+# gRPC Signal on single domain
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-signal-grpc
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`netbird.k3s.dahan.house`) && PathPrefix(`/signalexchange.SignalExchange/`)
+      kind: Rule
+      services:
+        - name: netbird-signal
+          port: 80
+          scheme: h2c
+  tls:
+    secretName: netbird-dashboard-tls
+---
+# Management API subdomain (netbird-api.k3s.dahan.house)
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -23,19 +89,31 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - web
     - websecure
   routes:
-    # HTTP API and gRPC routes (same port)
+    # gRPC Management
+    - match: Host(`netbird-api.k3s.dahan.house`) && PathPrefix(`/management.ManagementService/`)
+      kind: Rule
+      services:
+        - name: netbird-management
+          port: 33073
+          scheme: h2c
+    # REST API
+    - match: Host(`netbird-api.k3s.dahan.house`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: netbird-management
+          port: 80
+    # Default
     - match: Host(`netbird-api.k3s.dahan.house`)
       kind: Rule
       services:
         - name: netbird-management
-          port: 33073          
-          scheme: h2c
+          port: 80
   tls:
     secretName: netbird-api-tls
 ---
+# Signal subdomain (netbird-signal.k3s.dahan.house)
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -43,16 +121,21 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - web
     - websecure
   routes:
-    # gRPC Signal routes
+    # gRPC Signal
     - match: Host(`netbird-signal.k3s.dahan.house`) && PathPrefix(`/signalexchange.SignalExchange/`)
       kind: Rule
       services:
         - name: netbird-signal
-          port: 10000
+          port: 80
+          scheme: h2c
+    # Default
+    - match: Host(`netbird-signal.k3s.dahan.house`)
+      kind: Rule
+      services:
+        - name: netbird-signal
+          port: 80
           scheme: h2c
   tls:
     secretName: netbird-signal-tls
----
